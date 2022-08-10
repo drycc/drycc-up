@@ -1,7 +1,6 @@
 import os
 import sys
 import yaml
-from fabric.group import SerialGroup
 from fabric.connection import Connection
 
 INVENTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'inventory', sys.argv[1])
@@ -10,36 +9,205 @@ K3S_URL="https://%s:6443" % VARS["master"]
 
 script = lambda *args: "curl -sfL https://drycc.cc/install.sh | bash -s - %s" % " ".join(args)
 
-def master():
-    with Connection(VARS["master"], inline_ssh_env=True) as conn:
-        conn.config.run.env = VARS["environment"]
-        conn.run(script("check_metallb", "install_k3s_server", "install_helm", "install_components"))
 
-def slave():
-    with SerialGroup(VARS["slave"], inline_ssh_env=True) as conn:
-        conn.config.run.env = VARS["environment"]
-        conn.config.run.env["K3S_URL"] = "https://%s:6443" % VARS["master"]
-        conn.run(script("install_k3s_server", "install_helm"))
-
-
-def agent():
-    with SerialGroup(VARS["agent"], inline_ssh_env=True) as conn:
-        conn.config.run.env = VARS["environment"]
-        conn.config.run.env["K3S_URL"] = "https://%s:6443" % VARS["master"]
-        conn.run(script("install_k3s_agent"))
+def run_script(runner, command, envs=None, **kwargs):
+    envs = {} if envs is None else envs
+    envs.update(VARS["environment"])
+    create_env_file = """
+rm -rf /tmp/environment; cat << EOF > "/tmp/environment"
+%s
+EOF
+""" % "\n".join(["export %s=%s" % (key, value) for key, value in envs.items()])
+    runner.run(create_env_file)
+    command = "; ".join([
+        "source /tmp/environment",
+        command
+    ])
+    return runner.run(command, **kwargs)
 
 
-def lvmvg():
-    pass
+def prepare():
+    for item in VARS["prepare"]:
+        with Connection(
+            host=item["host"],
+            user=VARS["user"],
+            connect_kwargs={"key_filename": VARS["key_filename"]}
+        ) as conn:
+            for command in item["commands"]:
+                run_script(
+                    conn,
+                    command,
+                    out_stream=sys.stdout,
+                    asynchronous=True
+                ).join()
 
 
-def openebs():
-    pass
+def get_token():
+    with Connection(
+        host=VARS["master"],
+        user=VARS["user"],
+        connect_kwargs={"key_filename": VARS["key_filename"]}
+    ) as conn:
+        result = run_script(conn, "cat /var/lib/rancher/k3s/server/token", hide=True)
+        return result.stdout.strip()
 
 
-def metallb():
-    pass
+def install_master():
+    with Connection(
+        host=VARS["master"],
+        user=VARS["user"],
+        connect_kwargs={"key_filename": VARS["key_filename"]}
+    ) as conn:
+        run_script(
+            conn,
+            script("install_k3s_server", "install_helm"),
+            out_stream=sys.stdout,
+            asynchronous=True
+        ).join()
+
+
+def install_slaves():
+    for host in VARS["slave"]:
+        with Connection(
+            host=host,
+            user=VARS["user"],
+            connect_kwargs={"key_filename": VARS["key_filename"]}
+        ) as conn:
+            run_script(
+                conn,
+                script("install_k3s_server"),
+                envs={"K3S_URL": K3S_URL, "K3S_TOKEN": get_token()},
+                out_stream=sys.stdout,
+                asynchronous=True
+            ).join()
+
+
+def install_agents():
+    for host in VARS["agent"]:
+        with Connection(
+            host=host,
+            user=VARS["user"],
+            connect_kwargs={"key_filename": VARS["key_filename"]}
+        ) as conn:
+            run_script(
+                conn,
+                script("install_k3s_agent"),
+                envs={"K3S_URL": K3S_URL, "K3S_TOKEN": get_token()},
+                out_stream=sys.stdout,
+                asynchronous=True
+            ).join()
+
+
+def label_nodes():
+    with Connection(
+            host=VARS["master"],
+            user=VARS["user"],
+            connect_kwargs={"key_filename": VARS["key_filename"]}
+        ) as conn:
+        for item in VARS["label"]:
+            node = item["node"]
+            for label in item["labels"]:
+                key, value = label["key"], label["value"]
+                command = f"kubectl label nodes {node} {key}={value} --overwrite"
+                run_script(
+                    conn,
+                    command,
+                    out_stream=sys.stdout,
+                    asynchronous=True
+                ).join()
+
+
+def install_network():
+    with Connection(
+        host=VARS["master"],
+        user=VARS["user"],
+        connect_kwargs={"key_filename": VARS["key_filename"]}
+    ) as conn:
+        run_script(
+            conn,
+            script("install_network"),
+            out_stream=sys.stdout,
+            asynchronous=True
+        ).join()
+
+
+def install_metallb():
+    with Connection(
+        host=VARS["master"],
+        user=VARS["user"],
+        connect_kwargs={"key_filename": VARS["key_filename"]}
+    ) as conn:
+        conn.put(os.path.join(INVENTORY, "kubenetes", "metallb.yaml"), "/tmp")
+        run_script(
+            conn,
+            script("install_metallb"),
+            envs={
+                "METALLB_CONFIG_FILE": "/tmp/metallb.yaml",
+            },
+            out_stream=sys.stdout,
+            asynchronous=True
+        ).join()
+
+
+def install_carina():
+    with Connection(
+        host=VARS["master"],
+        user=VARS["user"],
+        connect_kwargs={"key_filename": VARS["key_filename"]}
+    ) as conn:
+        conn.put(os.path.join(INVENTORY, "kubenetes", "carina.yaml"), "/tmp")
+        run_script(
+            conn,
+            "; ".join([
+                "helm repo add carina-csi-driver https://carina-io.github.io",
+                "helm install carina-csi-driver carina-csi-driver/carina-csi-driver --set carina-scheduler.enabled=true,storage.create=false --create-namespace --namespace carina --version v0.10.0 --wait",
+                "kubectl apply -f /tmp/carina.yaml"
+            ]),
+            envs=None,
+            out_stream=sys.stdout,
+            asynchronous=True
+        ).join()
+
+def install_components():
+    with Connection(
+        host=VARS["master"],
+        user=VARS["user"],
+        connect_kwargs={"key_filename": VARS["key_filename"]}
+    ) as conn:
+        run_script(
+            conn,
+            script("install_traefik", "install_cert_manager", "install_catalog"),
+            out_stream=sys.stdout,
+            asynchronous=True
+        ).join()
+
+
+def install_drycc():
+    with Connection(
+        host=VARS["master"],
+        user=VARS["user"],
+        connect_kwargs={"key_filename": VARS["key_filename"]}
+    ) as conn:
+        run_script(
+            conn,
+            script("install_drycc", "install_helmbroker"),
+            out_stream=sys.stdout,
+            asynchronous=True
+        ).join()
+
+
+def install_all():
+    prepare()
+    install_master()
+    install_slaves()
+    install_agents()
+    install_network()
+    install_metallb()
+    label_nodes()
+    install_carina()
+    install_components()
+    install_drycc()
 
 
 if __name__ == "__main__":
-    master()
+    eval("{}()".format(sys.argv[2]))

@@ -1,0 +1,19 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: openebs-lvmpv-hdd
+parameters:
+  storage: "lvm"
+  volgroup: "lvmvg-hdd"
+allowVolumeExpansion: true
+provisioner: local.csi.openebs.io
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: openebs-lvmpv-nvme
+parameters:
+  storage: "lvm"
+  volgroup: "lvmvg-nvme"
+allowVolumeExpansion: true
+provisioner: local.csi.openebs.io

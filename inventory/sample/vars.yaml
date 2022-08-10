@@ -1,3 +1,17 @@
+user: root
+key_filename: /Users/duanhongyi/.ssh/id_rsa
+
+prepare:
+- host: 192.168.1.100
+  commands:
+  - apt-get update; apt-get install lvm2 bc curl nfs-common open-iscsi -yq
+- host: 192.168.1.101
+  commands:
+  - apt-get update; apt-get install lvm2 bc curl nfs-common open-iscsi -yq
+- host: 192.168.1.102
+  commands:
+  - apt-get update; apt-get install lvm2 bc curl nfs-common open-iscsi -yq
+
 master: 192.168.1.100
 
 slave:
@@ -7,67 +21,46 @@ slave:
 agent: []
 
 label:
-- key: drycc.cc/node
-  host: 192.168.1.100
-  value: "true"
-- key: drycc.cc/node
-  host: 192.168.1.101
-  value: "true"
-- key: drycc.cc/node
-  host: 192.168.1.102
-  value: "true"
-
-lvmvg:
-- host: 192.168.1.100
-  name: lvmvg-hdd
-  device:
-  - /dev/sdb1
-- host: 192.168.1.100
-  name: lvmvg-nvme
-  device:
-  - /dev/nvme0n1p1
-- host: 192.168.1.101
-  name: lvmvg-hdd
-  device:
-  - /dev/sdb1
-- host: 192.168.1.101
-  name: lvmvg-nvme
-  device:
-  - /dev/nvme0n1p1
-- host: 192.168.1.102
-  name: lvmvg-hdd
-  device:
-  - /dev/sdb1
-- host: 192.168.1.102
-  name: lvmvg-nvme
-  device:
-  - /dev/nvme0n1p1
+- node: sy-z1-001
+  labels:
+  - key: drycc.cc/carina-node
+    value: "true"
+- node: sy-z1-002
+  labels:
+  - key: drycc.cc/carina-node
+    value: "true"
+- node: sy-z1-003
+  labels:
+  - key: drycc.cc/carina-node
+    value: "true"
 
 environment:
-  # k3s
-  K3S_TOKEN: "K1078e7213ca32bdaabb44536f14b9ce7926bb201f41c3f3edd39975c16ff4901ea::server:33bde27f-ac49-4483-b6ac-f4eec2c6dbfa"
   # drycc
   CHANNEL: testing
+  INSTALL_DRYCC_MIRROR: cn
   PLATFORM_DOMAIN: hk-001.drycc.com
   DRYCC_REGISTRY: registry.drycc.cc
   DRYCC_ADMIN_USERNAME: admin
   DRYCC_ADMIN_PASSWORD: admin
-  CERT_MANAGER_ENABLED: true
+  CERT_MANAGER_ENABLED: "true"
   DATABASE_PERSISTENCE_SIZE: 30Gi
-  DATABASE_PERSISTENCE_STORAGE_CLASS: "openebs-lvm-localpv-nvme"
-  CONTROLLER_APP_STORAGE_CLASS: "openebs-cstor"
+  DATABASE_PERSISTENCE_STORAGE_CLASS: "csi-carina-nvme"
   REDIS_PERSISTENCE_SIZE: 32Gi
-  REDIS_PERSISTENCE_STORAGE_CLASS: "openebs-lvm-localpv-nvme"
-  MINIO_ZONE: 1
-  MINIO_REPLICAS: 3
-  MINIO_PERSISTENCE_SIZE: 50Gi
-  MINIO_PERSISTENCE_STORAGE_CLASS: "openebs-lvm-localpv-hdd"
-  RABBITMQ_PERSISTENCE_SIZE: 32Gi
-  RABBITMQ_PERSISTENCE_STORAGE_CLASS: "openebs-lvm-localpv-nvme"
-  INFLUXDB_PERSISTENCE_SIZE: 64Gi
-  INFLUXDB_PERSISTENCE_STORAGE_CLASS: "openebs-lvm-localpv-nvme"
-  MONITOR_GRAFANA_PERSISTENCE_SIZE: 64Gi
-  MONITOR_GRAFANA_PERSISTENCE_STORAGE_CLASS: "openebs-lvm-localpv-nvme"
+  REDIS_PERSISTENCE_STORAGE_CLASS: "csi-carina-nvme"
+  STORAGE_MINIO_ZONE: "1"
+  STORAGE_MINIO_REPLICAS: "3"
+  STORAGE_MINIO_PERSISTENCE_SIZE: "500Gi"
+  STORAGE_MINIO_PERSISTENCE_STORAGE_CLASS: "csi-carina-hdd"
+  STORAGE_META_PD_PERSISTENCE_SIZE: "100Gi"
+  STORAGE_META_PD_PERSISTENCE_STORAGE_CLASS: "csi-carina-nvme"
+  STORAGE_META_TIKV_PERSISTENCE_SIZE: "100Gi"
+  STORAGE_META_TIKV_PERSISTENCE_STORAGE_CLASS: "csi-carina-nvme"
+  RABBITMQ_PERSISTENCE_SIZE: "32Gi"
+  RABBITMQ_PERSISTENCE_STORAGE_CLASS: "csi-carina-nvme"
+  INFLUXDB_PERSISTENCE_SIZE: "64Gi"
+  INFLUXDB_PERSISTENCE_STORAGE_CLASS: "csi-carina-nvme"
+  MONITOR_GRAFANA_PERSISTENCE_SIZE: "64Gi"
+  MONITOR_GRAFANA_PERSISTENCE_STORAGE_CLASS: "csi-carina-nvme"
   ACME_SERVER: "https://acme.zerossl.com/v2/DV90"
   ACME_EAB_KEY_ID: "8o92h5U8FNI61YlC2L9ydg"
   ACME_EAB_KEY_SECRET: "696aYm71pL4B0oARgx9-0YNPeqTkA7SheDAemfjU-mbbqZd4sZnml_aG6rShZ1BhEtlV2CwgJnJMolbhrhOcOg"
