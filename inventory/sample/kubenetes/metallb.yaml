@@ -26,7 +26,6 @@ spec:
   - public
   - default
   aggregationLength: 32
-  localpref: 100
 
 ---
 apiVersion: metallb.io/v1beta2

@@ -208,6 +208,36 @@ def install_all():
     install_components()
     install_drycc()
 
+def clean_all():
+    hosts = []
+    hosts.append(VARS["master"])
+    hosts.extend(VARS["slave"])
+    hosts.extend(VARS["agent"])
+    for host in hosts:
+        with Connection(
+            host=host,
+            user=VARS["user"],
+            connect_kwargs={"key_filename": VARS["key_filename"]}
+        ) as conn:
+            run_script(
+                conn,
+                "||".join([
+                    "curl -sfL https://drycc.cc/uninstall.sh | bash - > /dev/null 2>&1",
+                    "echo clean k3s node %s fail" % host
+                ]),
+                out_stream=sys.stdout,
+                asynchronous=True
+            ).join()
+            run_script(
+                conn,
+                "||".join([
+                    """lvs|awk '{print $2"/"$1}' | xargs lvremove {} -f""",
+                    "echo clean lvs node %s fail" % host
+                ]),
+                out_stream=sys.stdout,
+                asynchronous=True
+            ).join()
+
 
 if __name__ == "__main__":
     eval("{}()".format(sys.argv[2]))

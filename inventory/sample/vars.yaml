@@ -37,6 +37,7 @@ label:
 environment:
   # drycc
   CHANNEL: testing
+  KUBECONFIG: /etc/rancher/k3s/k3s.yaml
   INSTALL_DRYCC_MIRROR: cn
   PLATFORM_DOMAIN: hk-001.drycc.com
   DRYCC_REGISTRY: registry.drycc.cc
