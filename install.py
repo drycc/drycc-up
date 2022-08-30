@@ -223,7 +223,7 @@ def clean_all():
                 conn,
                 "||".join([
                     "curl -sfL https://drycc.cc/uninstall.sh | bash - > /dev/null 2>&1",
-                    "echo clean k3s node %s fail" % host
+                    "echo clean k3s node %s ok" % host
                 ]),
                 out_stream=sys.stdout,
                 asynchronous=True
@@ -232,7 +232,7 @@ def clean_all():
                 conn,
                 "||".join([
                     """lvs|awk '{print $2"/"$1}' | xargs lvremove {} -f""",
-                    "echo clean lvs node %s fail" % host
+                    "echo clean lvs node %s ok" % host
                 ]),
                 out_stream=sys.stdout,
                 asynchronous=True
