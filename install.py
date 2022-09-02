@@ -7,7 +7,7 @@ INVENTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'inventory'
 VARS = yaml.load(open(os.path.join(INVENTORY, "vars.yaml")), Loader=yaml.CLoader)
 K3S_URL="https://%s:6443" % VARS["master"]
 
-script = lambda *args: "curl -sfL https://drycc.cc/install.sh | bash -s - %s" % " ".join(args)
+script = lambda *args: "curl -sfL https://www.drycc.cc/install.sh | bash -s - %s" % " ".join(args)
 
 
 def run_script(runner, command, envs=None, **kwargs):
@@ -160,7 +160,7 @@ def install_carina():
             conn,
             "; ".join([
                 "helm repo add carina-csi-driver https://carina-io.github.io",
-                "helm install carina-csi-driver carina-csi-driver/carina-csi-driver --set carina-scheduler.enabled=true,storage.create=false --create-namespace --namespace carina --version v0.10.0 --wait",
+                "helm install carina-csi-driver carina-csi-driver/carina-csi-driver --set carina-scheduler.enabled=true,storage.create=false --create-namespace --namespace carina --wait",
                 "kubectl apply -f /tmp/carina.yaml"
             ]),
             envs=None,
@@ -222,7 +222,7 @@ def clean_all():
             run_script(
                 conn,
                 "||".join([
-                    "curl -sfL https://drycc.cc/uninstall.sh | bash - > /dev/null 2>&1",
+                    "curl -sfL https://www.drycc.cc/uninstall.sh | bash - > /dev/null 2>&1",
                     "echo clean k3s node %s ok" % host
                 ]),
                 out_stream=sys.stdout,
