@@ -1,0 +1,55 @@
+scheduler:
+  enabled: false
+
+lvmd:
+  deviceClasses:
+  - name: hdd
+    volume-group: lvmvg-hdd
+    default: false
+    spare-gb: 10
+  - name: ssd
+    volume-group: lvmvg-ssd
+    default: true
+    spare-gb: 10
+
+webhook:
+  podMutatingWebhook:
+    enabled: false
+  pvcMutatingWebhook:
+    enabled: false
+
+controller:
+  replicaCount: 3
+  podDisruptionBudget:
+    enabled: false
+
+podSecurityPolicy:
+  create: false
+
+priorityClass:
+  enabled: true
+
+storageClasses:
+  - name: topolvm-hdd
+    storageClass:
+      fsType: xfs
+      reclaimPolicy:
+      annotations: {}
+      isDefaultClass: false
+      volumeBindingMode: WaitForFirstConsumer
+      allowVolumeExpansion: true
+      additionalParameters:
+        "topolvm.cybozu.com/device-class": "hdd"
+  - name: topolvm-ssd
+    storageClass:
+      fsType: xfs
+      reclaimPolicy:
+      annotations: {}
+      isDefaultClass: false
+      volumeBindingMode: WaitForFirstConsumer
+      allowVolumeExpansion: true
+      additionalParameters:
+        "topolvm.cybozu.com/device-class": "ssd"
+
+cert-manager:
+  enabled: false
