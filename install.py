@@ -149,19 +149,19 @@ def install_metallb():
         ).join()
 
 
-def install_carina():
+def install_topolvm():
     with Connection(
         host=VARS["master"],
         user=VARS["user"],
         connect_kwargs={"key_filename": VARS["key_filename"]}
     ) as conn:
-        conn.put(os.path.join(INVENTORY, "kubenetes", "carina.yaml"), "/tmp")
+        conn.put(os.path.join(INVENTORY, "kubenetes", "topolvm.yaml"), "/tmp")
         run_script(
             conn,
-            "; ".join([
-                "helm repo add carina-csi-driver https://carina-io.github.io",
-                "helm install carina-csi-driver carina-csi-driver/carina-csi-driver --set carina-scheduler.enabled=true,storage.create=false --create-namespace --namespace carina --wait",
-                "kubectl apply -f /tmp/carina.yaml"
+            ";".join([
+                "helm repo add topolvm https://topolvm.github.io/topolvm",
+                "helm repo update",
+                "helm install topolvm topolvm/topolvm -n topolvm --create-namespace -f /tmp/topolvm.yaml --wait"  # noqa
             ]),
             envs=None,
             out_stream=sys.stdout,
@@ -204,8 +204,8 @@ def install_all():
     install_network()
     install_metallb()
     label_nodes()
-    install_carina()
     install_components()
+    install_topolvm()
     install_drycc()
 
 def clean_all():
@@ -230,8 +230,10 @@ def clean_all():
             ).join()
             run_script(
                 conn,
-                "||".join([
-                    """lvs|awk '{print $2"/"$1}' | xargs lvremove {} -f""",
+                ";".join([
+                    """lvs|awk '{print $2"/"$1}' | xargs lvremove""",
+                    """pvs --noheadings|awk '{print $1}'| xargs pvremove""",
+                    """vgs --noheadings|awk '{print $1}'| xargs vgremove""",
                     "echo clean lvs node %s ok" % host
                 ]),
                 out_stream=sys.stdout,

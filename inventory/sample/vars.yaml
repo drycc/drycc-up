@@ -5,12 +5,21 @@ prepare:
 - host: 192.168.1.100
   commands:
   - apt-get update; apt-get install lvm2 bc curl nfs-common open-iscsi -yq
+  - pvcreate /dev/nvme0n1 /dev/sda
+  - vgcreate lvmvg-hdd /dev/sda
+  - vgcreate lvmvg-ssd /dev/nvme0n1
 - host: 192.168.1.101
   commands:
   - apt-get update; apt-get install lvm2 bc curl nfs-common open-iscsi -yq
+  - pvcreate /dev/nvme0n1 /dev/sda
+  - vgcreate lvmvg-hdd /dev/sda
+  - vgcreate lvmvg-ssd /dev/nvme0n1
 - host: 192.168.1.102
   commands:
   - apt-get update; apt-get install lvm2 bc curl nfs-common open-iscsi -yq
+  - pvcreate /dev/nvme0n1 /dev/sda
+  - vgcreate lvmvg-hdd /dev/sda
+  - vgcreate lvmvg-ssd /dev/nvme0n1
 
 master: 192.168.1.100
 
@@ -55,28 +64,28 @@ environment:
   HELMBROKER_CELERY_REPLICAS: 3
   DATABASE_REPLICAS: 3
   DATABASE_PERSISTENCE_SIZE: 30Gi
-  DATABASE_PERSISTENCE_STORAGE_CLASS: "csi-carina-nvme"
+  DATABASE_PERSISTENCE_STORAGE_CLASS: "topolvm-ssd"
   REDIS_REPLICAS: 3
   REDIS_PERSISTENCE_SIZE: 32Gi
-  REDIS_PERSISTENCE_STORAGE_CLASS: "csi-carina-nvme"
+  REDIS_PERSISTENCE_STORAGE_CLASS: "topolvm-ssd"
   STORAGE_MINIO_ZONE: "1"
   STORAGE_MINIO_REPLICAS: "3"
   STORAGE_MINIO_PERSISTENCE_SIZE: "500Gi"
-  STORAGE_MINIO_PERSISTENCE_STORAGE_CLASS: "csi-carina-hdd"
+  STORAGE_MINIO_PERSISTENCE_STORAGE_CLASS: "topolvm-hdd"
   STORAGE_META_PD_REPLICAS: 3
   STORAGE_META_PD_PERSISTENCE_SIZE: "100Gi"
-  STORAGE_META_PD_PERSISTENCE_STORAGE_CLASS: "csi-carina-nvme"
+  STORAGE_META_PD_PERSISTENCE_STORAGE_CLASS: "topolvm-ssd"
   STORAGE_META_TIKV_REPLICAS: 3
   STORAGE_META_TIKV_PERSISTENCE_SIZE: "100Gi"
-  STORAGE_META_TIKV_PERSISTENCE_STORAGE_CLASS: "csi-carina-nvme"
+  STORAGE_META_TIKV_PERSISTENCE_STORAGE_CLASS: "topolvm-ssd"
   RABBITMQ_REPLICAS: 3
   RABBITMQ_PERSISTENCE_SIZE: "32Gi"
-  RABBITMQ_PERSISTENCE_STORAGE_CLASS: "csi-carina-nvme"
+  RABBITMQ_PERSISTENCE_STORAGE_CLASS: "topolvm-ssd"
   INFLUXDB_REPLICAS: 3
   INFLUXDB_PERSISTENCE_SIZE: "64Gi"
-  INFLUXDB_PERSISTENCE_STORAGE_CLASS: "csi-carina-nvme"
+  INFLUXDB_PERSISTENCE_STORAGE_CLASS: "topolvm-ssd"
   MONITOR_GRAFANA_PERSISTENCE_SIZE: "64Gi"
-  MONITOR_GRAFANA_PERSISTENCE_STORAGE_CLASS: "csi-carina-nvme"
+  MONITOR_GRAFANA_PERSISTENCE_STORAGE_CLASS: "topolvm-ssd"
   ACME_SERVER: "https://acme.zerossl.com/v2/DV90"
   ACME_EAB_KEY_ID: "8o92h5U8FNI61YlC2L9ydg"
   ACME_EAB_KEY_SECRET: "696aYm71pL4B0oARgx9-0YNPeqTkA7SheDAemfjU-mbbqZd4sZnml_aG6rShZ1BhEtlV2CwgJnJMolbhrhOcOg"
