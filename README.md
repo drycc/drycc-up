@@ -27,7 +27,7 @@ drycc-up template
 Modify the files in the inventory directory, and then execute the installation command to install the cluster.
 
 ```
-python install.py sample install_all
+drycc-up run install_all
 ```
 
 See the install.py file for other functions.
