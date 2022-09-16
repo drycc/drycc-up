@@ -13,12 +13,18 @@ Virtual environment installation is recommended.
 ```
 python3 -m venv .venv
 source .venv/bin/activate
-pip3 install -r requirements.txt
+pip3 install https://github.com/drycc/drycc-up/archive/refs/heads/main.zip
 ```
 
 ## Installing Drycc
 
-Please refer to the contents of the `inventory/sample` directory for specific configuration. If we have an env with the same configuration as the `inventory/sample` directory, we will start the installation process:
+First, you need to generate the configuration template file.
+
+```
+drycc-up template
+```
+
+Modify the files in the inventory directory, and then execute the installation command to install the cluster.
 
 ```
 python install.py sample install_all

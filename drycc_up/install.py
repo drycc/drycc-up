@@ -1,13 +1,21 @@
 import os
+import shutil
 import sys
 import yaml
 from fabric.connection import Connection
 
-INVENTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'inventory', sys.argv[1])
-VARS = yaml.load(open(os.path.join(INVENTORY, "vars.yaml")), Loader=yaml.CLoader)
-K3S_URL="https://%s:6443" % VARS["master"]
+INVENTORY = os.path.join('inventory')
+VARS = None
+K3S_URL = None
 
 script = lambda *args: "curl -sfL https://www.drycc.cc/install.sh | bash -s - %s" % " ".join(args)
+
+
+
+def init():
+    global VARS, K3S_URL
+    VARS = yaml.load(open(os.path.join(INVENTORY, "vars.yaml")), Loader=yaml.CLoader)
+    K3S_URL="https://%s:6443" % VARS["master"]
 
 
 def run_script(runner, command, envs=None, **kwargs):
@@ -240,6 +248,31 @@ def clean_all():
                 asynchronous=True
             ).join()
 
+usage = """
+
+A tool for fast installation of drycc clusters.
+
+Usage: drycc-up <command> [<args>...]
+
+command:
+
+  run        run an installation process.
+  template   generate installation template.
+
+Use 'drycc-up run install_all' to deploy clusters.
+"""
+def main():
+    if len(sys.argv) > 2 and sys.argv[1] == "run":
+        init()
+        eval("{}()".format(sys.argv[2]))
+    elif len(sys.argv) == 2 and sys.argv[1] == "template":
+        if not os.path.exists("inventory"):
+            current = os.path.dirname(os.path.abspath(__file__))
+            shutil.copytree(os.path.join(current, "templates"), "inventory")
+        else:
+            print("the inventory directory already exists")
+    else:
+        print(usage)
 
 if __name__ == "__main__":
-    eval("{}()".format(sys.argv[2]))
+    main()
