@@ -13,7 +13,7 @@ Virtual environment installation is recommended.
 ```
 python3 -m venv .venv
 source .venv/bin/activate
-pip3 install https://github.com/drycc/drycc-up/archive/refs/heads/main.zip
+pip3 install https://drycc-mirrors.drycc.cc/drycc/drycc-up/archive/refs/heads/main.zip
 ```
 
 ## Installing Drycc
