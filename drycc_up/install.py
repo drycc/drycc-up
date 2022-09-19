@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import sys
 import yaml
@@ -164,17 +165,35 @@ def install_topolvm():
         connect_kwargs={"key_filename": VARS["key_filename"]}
     ) as conn:
         conn.put(os.path.join(INVENTORY, "kubenetes", "topolvm.yaml"), "/tmp")
-        run_script(
+        result = run_script(
             conn,
-            ";".join([
-                "helm repo add topolvm https://topolvm.github.io/topolvm",
-                "helm repo update",
-                "helm install topolvm topolvm/topolvm -n topolvm --create-namespace -f /tmp/topolvm.yaml --wait"  # noqa
-            ]),
+            "curl -Ls https://drycc-mirrors.drycc.cc/topolvm/topolvm/releases|grep /topolvm/topolvm/releases/tag/",
             envs=None,
-            out_stream=sys.stdout,
-            asynchronous=True
-        ).join()
+            out_stream=open(os.devnull, 'w'),
+            asynchronous=False
+        )
+        versions = []
+        for tag in result.stdout.strip().split("\n"):
+            m = re.search("/topolvm/topolvm/releases/tag/topolvm-chart-v[0-9\.]{1,}", tag)
+            if m:
+                versions.append(m.group().replace("/topolvm/topolvm/releases/tag/", ""))
+        if len(versions) == 0:
+            raise ValueError("Cannot get the topolvm version")
+        print("topolvm versions: ", versions)
+        url = "https://drycc-mirrors.drycc.cc/topolvm/topolvm/archive/refs/tags/{}.tar.gz".format(
+            versions[0]
+        )
+        script = ";".join([
+            "rm -rf topolvm-*",
+            "curl -o tmp.tar.gz %s" % url,
+            "tar -xvzf tmp.tar.gz",
+            "cd topolvm-topolvm-chart-*/charts/topolvm",
+            "helm dependency update",
+            "helm install topolvm . -n topolvm --create-namespace -f /tmp/topolvm.yaml --wait",
+            "cd -",
+            "rm -rf topolvm-* tmp.tar.gz",
+        ])
+        run_script(conn, script, envs=None, out_stream=sys.stdout, asynchronous=True).join()
 
 def install_components():
     with Connection(
