@@ -1,0 +1,28 @@
+replicas: 3
+celeryReplicas: 3
+username: {{HELMBROKER_USERNAME}}
+password: {{HELMBROKER_PASSWORD}}
+
+persistence:
+  size: 20Gi
+  storageClass: drycc-storage
+
+repositories:
+- name: drycc-helm-broker
+  url: https://drycc-mirrors.drycc.cc/drycc-addons/addons/releases/download/latest/index.yaml
+
+rabbitmq:
+  replicas: 3
+  username: "{{RABBITMQ_USERNAME}}"
+  password: "{{RABBITMQ_PASSWORD}}"
+  persistence:
+    enabled: true # Set to true to enable persistence
+    size: 5Gi # PVC size
+    storageClass: "topolvm-ssd"
+
+global:
+  rabbitmqLocation: on-cluster
+  ingressClass: traefik
+  clusterDomain: cluster.local
+  platformDomain: {{PLATFORM_DOMAIN}}
+  certManagerEnabled: {{CERTMANAGER_ENABLED}}

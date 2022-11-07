@@ -21,6 +21,7 @@ def read_text(file_path):
 README = read_text(os.path.join(here, 'README.md'))
 
 requires = [
+    "jinja2",
     "fabric",
     "pyyaml",
 ]

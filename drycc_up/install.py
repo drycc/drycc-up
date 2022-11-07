@@ -3,20 +3,25 @@ import re
 import shutil
 import sys
 import yaml
+from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 from fabric.connection import Connection
 
-INVENTORY = os.path.join('inventory')
+INVENTORY = os.path.join('templates')
 VARS = None
 K3S_URL = None
+CHARS_URL = None
 
 script = lambda *args: "curl -sfL https://www.drycc.cc/install.sh | bash -s - %s" % " ".join(args)
 
 
-
 def init():
-    global VARS, K3S_URL
-    VARS = yaml.load(open(os.path.join(INVENTORY, "vars.yaml")), Loader=yaml.CLoader)
+    global VARS, K3S_URL, CHARS_URL
+    VARS = yaml.load(open(os.path.join(INVENTORY, "vars.yaml")), Loader=yaml.Loader)
     K3S_URL="https://%s:6443" % VARS["master"]
+    if VARS["environment"]["CHANNEL"] == "stable":
+        CHARS_URL = "oci://registry.drycc.cc/charts"
+    else:
+        CHARS_URL = "oci://registry.drycc.cc/charts-testing"
 
 
 def run_script(runner, command, envs=None, **kwargs):
@@ -33,6 +38,11 @@ EOF
         command
     ])
     return runner.run(command, **kwargs)
+
+
+def render_yaml(template, **kwargs):
+    env = Environment(loader=FileSystemLoader("templates"))
+    return env.get_template(template).render(kwargs)
 
 
 def prepare():
@@ -59,6 +69,33 @@ def get_token():
     ) as conn:
         result = run_script(conn, "cat /var/lib/rancher/k3s/server/token", hide=True)
         return result.stdout.strip()
+
+
+def helm_install(name, chart_url, wait=False):
+    with Connection(
+        host=VARS["master"],
+        user=VARS["user"],
+        connect_kwargs={"key_filename": VARS["key_filename"]}
+    ) as conn:
+        values_file = "/tmp/%s.yaml" % name 
+        with open(values_file , "w") as f:
+            f.write(render_yaml("helm/%s.yaml" % name, **VARS["environment"]))
+        conn.put(values_file, "/tmp")
+        os.remove(values_file)
+        command = "helm install %s %s -f %s -n %s --create-namespace" % (
+            name,
+            chart_url,
+            values_file,
+            name
+        )
+        if wait:
+            command = "%s --wait" % command
+        run_script(
+            conn,
+            command,
+            out_stream=sys.stdout,
+            asynchronous=True
+        ).join()
 
 
 def install_master():
@@ -209,18 +246,33 @@ def install_components():
         ).join()
 
 
-def install_drycc():
+def install_manager():
+    helm_install("drycc-manager", "%s/manager" % CHARS_URL, True)
+
+
+def install_helmbroker():
+    helm_install("drycc-helmbroker", "%s/helmbroker" % CHARS_URL, True)
     with Connection(
         host=VARS["master"],
         user=VARS["user"],
         connect_kwargs={"key_filename": VARS["key_filename"]}
     ) as conn:
+        name = "catalog"
+        kube_file = "/tmp/%s.yaml" % name 
+        with open(kube_file , "w") as f:
+            f.write(render_yaml("kubenetes/%s.yaml" % name, **VARS["environment"]))
+        conn.put(kube_file, "/tmp")
+        os.remove(kube_file)
         run_script(
             conn,
-            script("install_drycc", "install_helmbroker"),
+            "kubectl apply -f %s" % kube_file,
             out_stream=sys.stdout,
             asynchronous=True
         ).join()
+
+
+def install_drycc():
+    helm_install("drycc", "%s/workflow" % CHARS_URL, True)
 
 
 def install_all():
@@ -287,11 +339,12 @@ def main():
     elif len(sys.argv) == 2 and sys.argv[1] == "template":
         if not os.path.exists("inventory"):
             current = os.path.dirname(os.path.abspath(__file__))
-            shutil.copytree(os.path.join(current, "templates"), "inventory")
+            shutil.copytree(os.path.join(current, "templates"), "templates")
         else:
             print("the inventory directory already exists")
     else:
         print(usage)
 
 if __name__ == "__main__":
-    main()
+    init()
+    print(render_yaml("helm/drycc.yaml", **VARS["environment"]))

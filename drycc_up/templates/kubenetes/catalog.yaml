@@ -1,0 +1,18 @@
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ClusterServiceBroker
+metadata:
+  finalizers:
+  - kubernetes-incubator/service-catalog
+  generation: 1
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    heritage: Helm
+  name: helmbroker
+spec:
+  relistBehavior: Duration
+  relistRequests: 5
+  {%- if CERTMANAGER_ENABLED == "true" %}
+  url: "https://{{HELMBROKER_USERNAME}}:{{HELMBROKER_PASSWORD}}@drycc-helmbroker.{{PLATFORM_DOMAIN}}"
+  {%- else %}
+  url: "http://{{HELMBROKER_USERNAME}}:{{HELMBROKER_PASSWORD}}@drycc-helmbroker.{{PLATFORM_DOMAIN}}"
+  {%- endif %}

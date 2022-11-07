@@ -1,0 +1,47 @@
+replicas: 3
+stripePublicKey: "pk_test_51KqWYDCzs86m8hstL4xpe2HwXKfmP3FFInWRnNy8BgWkENg2bZlBN0yhneYjq6MxrbIJgopRx08bdFWcVCS9bK7Y001jajBdQL"
+stripeSecretKey: "sk_test_51KqWYDCzs86m8hstb7Ps65B8J1RTBBIFD9yATodFHNzHmLbWdGO0wWNTuGShJI1U2COxSHxOwkyKdw21APDtzwca00EduJRwIH"
+stripeWebhookSecret: "whsec_e352997a7bd66a05a85f3d86e540a1d01b22553e716ed0ad0924b4478d56626c"
+environment:
+  LEGAL_ENABLED: true
+
+redis:
+  replicas: 3
+  persistence:
+    enabled: true # Set to true to enable persistence
+    size: 10Gi
+    storageClass: "topolvm-ssd"
+
+database:
+  limitsMemory: "256Mi"
+  limitsHugepages2Mi: "256Mi"
+  initDatabases: "manager,passport"
+  persistence:
+    enabled: true # Set to true to enable persistence
+    size: 10Gi # PVC size
+    storageClass: "topolvm-ssd"
+
+rabbitmq:
+  replicas: 3
+  username: "{{RABBITMQ_USERNAME}}"
+  password: "{{RABBITMQ_PASSWORD}}"
+  persistence:
+    enabled: true # Set to true to enable persistence
+    size: 5Gi # PVC size
+    storageClass: "topolvm-ssd"
+
+passport:
+  replicas: 3
+  adminUsername: {{PASSPORT_USERNAME}}
+  adminPassword: {{PASSPORT_PASSWORD}}
+  initGrafanaKey: false
+  initManagerKey: true
+  initControllerKey: false
+  environment:
+    ADMIN_ENABLED: True
+    REGISTRATION_ENABLED: True
+
+global:
+  ingressClass: "traefik"
+  platformDomain: {{PLATFORM_DOMAIN}}
+  certManagerEnabled: {{CERTMANAGER_ENABLED}}

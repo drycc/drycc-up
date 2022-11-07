@@ -1,0 +1,138 @@
+builder:
+  replicas: 3
+  imageRegistry: registry.drycc.cc
+  service:
+    type: LoadBalancer
+    annotations:
+      metallb.universe.tf/address-pool: public
+      metallb.universe.tf/allow-shared-ip: drycc
+
+database:
+  replicas: 3
+  imageRegistry: registry.drycc.cc
+  limitsMemory: 256Mi
+  limitsHugepages2Mi: 256Mi
+  persistence:
+    enabled: true
+    size: 30Gi
+    storageClass: topolvm-ssd
+
+fluentd:
+  imageRegistry: registry.drycc.cc 
+  daemonEnvironment:
+    CONTAINER_TAIL_PARSER_TYPE: "/^(?<time>.+) (?<stream>stdout|stderr)( (?<tags>.))? (?<log>.*)$/"
+
+controller:
+  apiReplicas: 3
+  celeryReplicas: 3
+  webhookReplicas: 3
+  imageRegistry: registry.drycc.cc
+  appRuntimeClass: crun
+  appStorageClass: drycc-storage
+  passportUrl: "http://drycc-passport.192.168.6.230.nip.io"
+  passportKey: "kg7OXbsguRBHmsogGEUtHFVEjicWI1gnc5nvB26E"
+  passportSecret: "JcxoPGxG9fIiwUbTPcrk0wzU1nQvlCZRJ5ZyNvhyCdby9OFVVbcPGvgdLFUGZRyp"
+  workflowManagerUrl: "http://drycc-manager.192.168.6.230.nip.io/v1"
+  workflowManagerAccessKey: "a7f228d5-622d-413c-ab1e-7abbb10ee156"
+  workflowManagerSecretKey: "stJnBgKTdFrglDzXQklSqzPSgRFLhPcZUlBEQYQoPErIbKiQWQziIyTQdaJxBOuI"
+
+redis:
+  replicas: 3
+  imageRegistry: registry.drycc.cc
+  persistence:
+    enabled: true
+    size: 32Gi
+    storageClass: topolvm-ssd
+
+storage:
+  minio:
+    zone: 1
+    drives: 4
+    replicas: 3
+    imageRegistry: registry.drycc.cc
+    persistence:
+      enabled: true
+      size: 500Gi
+      storageClass: topolvm-hdd
+  meta:
+    pd:
+      replicas: 3
+      persistence:
+        enabled: true
+        size: 100Gi
+        storageClass: topolvm-ssd
+    tikv:
+      replicas: 3
+      persistence:
+        enabled: true
+        size: 100Gi
+        storageClass: topolvm-ssd
+
+rabbitmq:
+  replicas: 3
+  imageRegistry: registry.drycc.cc
+  username: {{RABBITMQ_USERNAME}}
+  password: {{RABBITMQ_PASSWORD}}
+  persistence:
+    enabled: true
+    size: 32Gi
+    storageClass: topolvm-ssd
+
+imagebuilder:
+  imageRegistry: registry.drycc.cc
+  container_registries: |
+    unqualified-search-registries = ["docker.io"]
+    short-name-mode="permissive"
+    [[registry]]
+    prefix = "docker.io"
+    location = "registry-1.docker.io"
+    [[registry.mirror]]
+    prefix = "docker.io"
+    location = "hub-mirror.c.163.com"
+
+influxdb:
+  replicas: 3
+  imageRegistry: registry.drycc.cc
+  user: {{INFLUXDB_USERNAME}}
+  password: {{INFLUXDB_PASSWORD}}
+  persistence:
+    enabled: true
+    size: 64Gi
+    storageClass: topolvm-ssd
+
+logger:
+  replicas: 3
+  imageRegistry: registry.drycc.cc
+
+monitor:
+  grafana:
+    imageRegistry: registry.drycc.cc
+    passportUrl: "http://drycc-passport.192.168.6.230.nip.io"
+    passportKey: "1AsjcPbWffpcH18HjGAPMLWEWr4nYlayOhBWl9V7"
+    passportSecret: "rg6ozOyvxgqOMyULa2wfKIRPq2yJIIH8EwsTDHOkmusmnzZgoESRP5zH6wZ0pmCt"
+    persistence:
+      enabled: true
+      size: 64Gi
+      storageClass: topolvm-ssd
+  telegraf:
+    imageRegistry: registry.drycc.cc
+
+registry:
+  replicas: 3
+  imageRegistry: registry.drycc.cc
+
+registry-proxy:
+  imageRegistry: registry.drycc.cc
+
+acme:
+  server: https://acme.zerossl.com/v2/DV90
+  externalAccountBinding:
+    keyID: 8o92h5U8FNI61YlC2L9ydg
+    keySecret: 696aYm71pL4B0oARgx9-0YNPeqTkA7SheDAemfjU-mbbqZd4sZnml_aG6rShZ1BhEtlV2CwgJnJMolbhrhOcOg
+
+global:
+  clusterDomain: cluster.local
+  platformDomain: {{PLATFORM_DOMAIN}}
+  certManagerEnabled: {{CERTMANAGER_ENABLED}}
+  ingressClass: traefik
+  passportLocation: "off-cluster"
