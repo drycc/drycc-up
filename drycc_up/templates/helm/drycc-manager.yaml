@@ -43,5 +43,5 @@ passport:
 
 global:
   ingressClass: "traefik"
-  platformDomain: {{PLATFORM_DOMAIN}}
+  platformDomain: {{MANAGER_PLATFORM_DOMAIN}}
   certManagerEnabled: {{CERTMANAGER_ENABLED}}

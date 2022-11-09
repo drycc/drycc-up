@@ -12,7 +12,7 @@ spec:
   relistBehavior: Duration
   relistRequests: 5
   {%- if CERTMANAGER_ENABLED == "true" %}
-  url: "https://{{HELMBROKER_USERNAME}}:{{HELMBROKER_PASSWORD}}@drycc-helmbroker.{{PLATFORM_DOMAIN}}"
+  url: "https://{{HELMBROKER_USERNAME}}:{{HELMBROKER_PASSWORD}}@drycc-helmbroker.{{HELMBROKER_PLATFORM_DOMAIN}}"
   {%- else %}
-  url: "http://{{HELMBROKER_USERNAME}}:{{HELMBROKER_PASSWORD}}@drycc-helmbroker.{{PLATFORM_DOMAIN}}"
+  url: "http://{{HELMBROKER_USERNAME}}:{{HELMBROKER_PASSWORD}}@drycc-helmbroker.{{HELMBROKER_PLATFORM_DOMAIN}}"
   {%- endif %}

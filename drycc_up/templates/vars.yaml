@@ -38,6 +38,8 @@ environment:
   INSTALL_DRYCC_MIRROR: cn
   # jinja2 template env
   PLATFORM_DOMAIN: "192.168.6.230.nip.io"
+  MANAGER_PLATFORM_DOMAIN: "manager.192.168.6.230.nip.io"
+  HELMBROKER_PLATFORM_DOMAIN: "helmbroker.192.168.6.230.nip.io"
   RABBITMQ_USERNAME: "admin"
   RABBITMQ_PASSWORD: "admin1234567890"
   INFLUXDB_USERNAME: "admin"
