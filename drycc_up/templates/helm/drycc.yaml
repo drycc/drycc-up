@@ -29,12 +29,20 @@ controller:
   imageRegistry: registry.drycc.cc
   appRuntimeClass: crun
   appStorageClass: drycc-storage
-  passportUrl: "http://drycc-passport.192.168.6.230.nip.io"
-  passportKey: "kg7OXbsguRBHmsogGEUtHFVEjicWI1gnc5nvB26E"
-  passportSecret: "JcxoPGxG9fIiwUbTPcrk0wzU1nQvlCZRJ5ZyNvhyCdby9OFVVbcPGvgdLFUGZRyp"
-  workflowManagerUrl: "http://drycc-manager.192.168.6.230.nip.io/v1"
-  workflowManagerAccessKey: "a7f228d5-622d-413c-ab1e-7abbb10ee156"
-  workflowManagerSecretKey: "stJnBgKTdFrglDzXQklSqzPSgRFLhPcZUlBEQYQoPErIbKiQWQziIyTQdaJxBOuI"
+  {%- if global.certManagerEnabled == "true" %}
+  passportUrl: "https://drycc-passport.{{manager.platformDomain}}"
+  {%- else %}
+  passportUrl: "http://drycc-passport.{{manager.platformDomain}}"
+  {%- endif %}
+  passportKey: {{controller.passportKey}}
+  passportSecret: {{controller.passportSecret}}
+  {%- if global.certManagerEnabled == "true" %}
+  workflowManagerUrl: "https://drycc-manager.{{manager.platformDomain}}/v1"
+  {%- else %}
+  workflowManagerUrl: "http://drycc-manager.{{manager.platformDomain}}/v1"
+  {%- endif %}
+  workflowManagerAccessKey: {{controller.workflowManagerAccessKey}}
+  workflowManagerSecretKey: {{controller.workflowManagerSecretKey}}
 
 redis:
   replicas: 3
@@ -71,8 +79,8 @@ storage:
 rabbitmq:
   replicas: 3
   imageRegistry: registry.drycc.cc
-  username: {{RABBITMQ_USERNAME}}
-  password: {{RABBITMQ_PASSWORD}}
+  username: drycc
+  password: {{64|random_ascii}}
   persistence:
     enabled: true
     size: 32Gi
@@ -93,8 +101,8 @@ imagebuilder:
 influxdb:
   replicas: 3
   imageRegistry: registry.drycc.cc
-  user: {{INFLUXDB_USERNAME}}
-  password: {{INFLUXDB_PASSWORD}}
+  user: drycc
+  password: {{64|random_ascii}}
   persistence:
     enabled: true
     size: 64Gi
@@ -107,9 +115,13 @@ logger:
 monitor:
   grafana:
     imageRegistry: registry.drycc.cc
-    passportUrl: "http://drycc-passport.192.168.6.230.nip.io"
-    passportKey: "1AsjcPbWffpcH18HjGAPMLWEWr4nYlayOhBWl9V7"
-    passportSecret: "rg6ozOyvxgqOMyULa2wfKIRPq2yJIIH8EwsTDHOkmusmnzZgoESRP5zH6wZ0pmCt"
+    {%- if global.certManagerEnabled == "true" %}
+    passportUrl: "https://drycc-passport.{{manager.platformDomain}}"
+    {%- else %}
+    passportUrl: "http://drycc-passport.{{manager.platformDomain}}"
+    {%- endif %}
+    passportKey: {{monitor.grafana.passportKey}}
+    passportSecret: {{monitor.grafana.passportSecret}}
     persistence:
       enabled: true
       size: 64Gi
@@ -131,8 +143,8 @@ acme:
     keySecret: 696aYm71pL4B0oARgx9-0YNPeqTkA7SheDAemfjU-mbbqZd4sZnml_aG6rShZ1BhEtlV2CwgJnJMolbhrhOcOg
 
 global:
-  clusterDomain: cluster.local
-  platformDomain: {{PLATFORM_DOMAIN}}
-  certManagerEnabled: {{CERTMANAGER_ENABLED}}
-  ingressClass: traefik
+  clusterDomain: {{global.clusterDomain}}
+  platformDomain: {{global.platformDomain}}
+  certManagerEnabled: {{global.certManagerEnabled}}
+  ingressClass: {{global.ingressClass}}
   passportLocation: "off-cluster"

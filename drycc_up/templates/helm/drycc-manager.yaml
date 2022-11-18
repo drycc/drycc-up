@@ -5,6 +5,13 @@ stripeWebhookSecret: "whsec_e352997a7bd66a05a85f3d86e540a1d01b22553e716ed0ad0924
 environment:
   LEGAL_ENABLED: true
 
+# The following configurations are used to initialize the clusters
+initClusters:
+- name: local
+  url: "http://drycc.{{global.platformDomain}}"
+  key: {{controller.workflowManagerAccessKey}}
+  secret: {{controller.workflowManagerSecretKey}}
+
 redis:
   replicas: 3
   persistence:
@@ -23,8 +30,8 @@ database:
 
 rabbitmq:
   replicas: 3
-  username: "{{RABBITMQ_USERNAME}}"
-  password: "{{RABBITMQ_PASSWORD}}"
+  username: drycc
+  password: {{64|random_ascii}}
   persistence:
     enabled: true # Set to true to enable persistence
     size: 5Gi # PVC size
@@ -32,16 +39,37 @@ rabbitmq:
 
 passport:
   replicas: 3
-  adminUsername: {{PASSPORT_USERNAME}}
-  adminPassword: {{PASSPORT_PASSWORD}}
-  initGrafanaKey: false
-  initManagerKey: true
-  initControllerKey: false
+  adminUsername: {{passport.adminUsername}}
+  adminPassword: {{passport.adminPassword}}
   environment:
     ADMIN_ENABLED: True
     REGISTRATION_ENABLED: True
+  initApplications:
+  - name: "manager"
+    key: ""
+    secret: ""
+    prefix: "drycc-manager"
+    redirect_uri: "/v1/complete/drycc/"
+  - name: "controller"
+    key: {{controller.passportKey}}
+    secret: {{controller.passportSecret}}
+    prefix: ""
+    {%- if global.certManagerEnabled == "true" %}
+    redirect_uri: "https://drycc.{{global.platformDomain}}/v2/complete/drycc/"
+    {%- else %}
+    redirect_uri: "http://drycc.{{global.platformDomain}}/v2/complete/drycc/"
+    {%- endif %}
+  - name: "grafana"
+    key: {{monitor.grafana.passportKey}}
+    secret: {{monitor.grafana.passportSecret}}
+    prefix: ""
+    {%- if global.certManagerEnabled == "true" %}
+    redirect_uri: "https://drycc-monitor-grafana.{{global.platformDomain}}/login/generic_oauth"
+    {%- else %}
+    redirect_uri: "http://drycc-monitor-grafana.{{global.platformDomain}}/login/generic_oauth"
+    {%- endif %}
 
 global:
-  ingressClass: "traefik"
-  platformDomain: {{MANAGER_PLATFORM_DOMAIN}}
-  certManagerEnabled: {{CERTMANAGER_ENABLED}}
+  ingressClass: {{global.ingressClass}}
+  platformDomain: {{manager.platformDomain}}
+  certManagerEnabled: {{global.certManagerEnabled}}

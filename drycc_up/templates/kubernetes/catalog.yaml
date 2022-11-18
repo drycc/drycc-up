@@ -11,8 +11,8 @@ metadata:
 spec:
   relistBehavior: Duration
   relistRequests: 5
-  {%- if CERTMANAGER_ENABLED == "true" %}
-  url: "https://{{HELMBROKER_USERNAME}}:{{HELMBROKER_PASSWORD}}@drycc-helmbroker.{{HELMBROKER_PLATFORM_DOMAIN}}"
+  {%- if global.certManagerEnabled == "true" %}
+  url: "https://{{helmbroker.username}}:{{helmbroker.password}}@drycc-helmbroker.{{helmbroker.platformDomain}}"
   {%- else %}
-  url: "http://{{HELMBROKER_USERNAME}}:{{HELMBROKER_PASSWORD}}@drycc-helmbroker.{{HELMBROKER_PLATFORM_DOMAIN}}"
+  url: "http://{{helmbroker.username}}:{{helmbroker.password}}@drycc-helmbroker.{{helmbroker.platformDomain}}"
   {%- endif %}

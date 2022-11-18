@@ -31,27 +31,38 @@ agent: []
 
 label: []
 
+# share vars used by jinja2 template
+global:
+  ingressClass: traefik
+  clusterDomain: cluster.local
+  platformDomain: 192.168.6.230.nip.io
+  certManagerEnabled: "false"
+
+passport:
+  adminUsername: drycc
+  adminPassword: {{64|random_ascii}}
+
+controller:
+  passportKey: {{40|random_ascii}}
+  passportSecret: {{60|random_ascii}}
+  workflowManagerAccessKey: {{4|uuid}}
+  workflowManagerSecretKey: {{64|random_ascii}}
+
+monitor:
+  grafana:
+    passportKey: {{40|random_ascii}}
+    passportSecret: {{60|random_ascii}}
+
+manager:
+  platformDomain: manager.192.168.6.230.nip.io
+
+helmbroker:
+  username: drycc
+  password: {{32|random_ascii}}
+  platformDomain: helmbroker.192.168.6.230.nip.io
+
 environment:
   # drycc
   CHANNEL: testing
   KUBECONFIG: /etc/rancher/k3s/k3s.yaml
   INSTALL_DRYCC_MIRROR: cn
-  # jinja2 template env
-  PLATFORM_DOMAIN: "192.168.6.230.nip.io"
-  MANAGER_PLATFORM_DOMAIN: "manager.192.168.6.230.nip.io"
-  HELMBROKER_PLATFORM_DOMAIN: "helmbroker.192.168.6.230.nip.io"
-  RABBITMQ_USERNAME: "admin"
-  RABBITMQ_PASSWORD: "admin1234567890"
-  INFLUXDB_USERNAME: "admin"
-  INFLUXDB_PASSWORD: "admin1234567890"
-  PASSPORT_USERNAME: "admin"
-  PASSPORT_PASSWORD: "admin1234567890"
-  HELMBROKER_USERNAME: "admin"
-  HELMBROKER_PASSWORD: "admin1234567890"
-  CERTMANAGER_ENABLED: false
-  GRAFANA_PASSPORT_URL: "http://drycc-passport.192.168.6.230.nip.io"
-  GRAFANA_PASSPORT_KEY: "key"
-  GRAFANA_PASSPORT_SECRET: "secret"
-  CONTROLLER_PASSPORT_URL: "http://drycc-passport.192.168.6.230.nip.io"
-  CONTROLLER_PASSPORT_KEY: "key"
-  CONTROLLER_PASSPORT_SECRET: "secret" 

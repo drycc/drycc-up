@@ -2,8 +2,13 @@ import os
 import re
 import shutil
 import sys
+import uuid
+import pathlib
 import yaml
-from jinja2 import Environment, FileSystemLoader, TemplateNotFound
+import random
+import string
+from jinja2 import Environment, FileSystemLoader
+from jinja2.filters import FILTERS
 from fabric.connection import Connection
 
 INVENTORY = os.path.join('templates')
@@ -12,11 +17,17 @@ K3S_URL = None
 CHARS_URL = None
 
 script = lambda *args: "curl -sfL https://www.drycc.cc/install.sh | bash -s - %s" % " ".join(args)
+FILTERS['uuid'] = lambda x: str(getattr(uuid, "uuid%s" % x)())
+FILTERS['random_ascii'] = lambda x: ''.join([random.choice(string.ascii_letters) for _ in range(x)])
 
 
 def init():
     global VARS, K3S_URL, CHARS_URL
-    VARS = yaml.load(open(os.path.join(INVENTORY, "vars.yaml")), Loader=yaml.Loader)
+    vars_file = os.path.join(INVENTORY, "vars.lock")
+    if not os.path.exists(vars_file):
+        vars_lock_text = render_yaml("vars.yaml")
+        pathlib.Path(vars_file).write_text(vars_lock_text)
+    VARS = yaml.load(open(vars_file), Loader=yaml.Loader)
     K3S_URL="https://%s:6443" % VARS["master"]
     if VARS["environment"]["CHANNEL"] == "stable":
         CHARS_URL = "oci://registry.drycc.cc/charts"
@@ -42,7 +53,8 @@ EOF
 
 def render_yaml(template, **kwargs):
     env = Environment(loader=FileSystemLoader("templates"))
-    return env.get_template(template).render(kwargs)
+    template  = env.get_template(template)
+    return template.render(kwargs)
 
 
 def prepare():
@@ -79,7 +91,7 @@ def helm_install(name, chart_url, wait=False):
     ) as conn:
         values_file = "/tmp/%s.yaml" % name 
         with open(values_file , "w") as f:
-            f.write(render_yaml("helm/%s.yaml" % name, **VARS["environment"]))
+            f.write(render_yaml("helm/%s.yaml" % name, **VARS))
         conn.put(values_file, "/tmp")
         os.remove(values_file)
         command = "helm install %s %s -f %s -n %s --create-namespace" % (
@@ -183,7 +195,7 @@ def install_metallb():
         user=VARS["user"],
         connect_kwargs={"key_filename": VARS["key_filename"]}
     ) as conn:
-        conn.put(os.path.join(INVENTORY, "kubenetes", "metallb.yaml"), "/tmp")
+        conn.put(os.path.join(INVENTORY, "kubernetes", "metallb.yaml"), "/tmp")
         run_script(
             conn,
             script("install_metallb"),
@@ -201,7 +213,7 @@ def install_topolvm():
         user=VARS["user"],
         connect_kwargs={"key_filename": VARS["key_filename"]}
     ) as conn:
-        conn.put(os.path.join(INVENTORY, "kubenetes", "topolvm.yaml"), "/tmp")
+        conn.put(os.path.join(INVENTORY, "kubernetes", "topolvm.yaml"), "/tmp")
         result = run_script(
             conn,
             "curl -Ls https://drycc-mirrors.drycc.cc/topolvm/topolvm/releases|grep /topolvm/topolvm/releases/tag/",
@@ -260,7 +272,7 @@ def install_helmbroker():
         name = "catalog"
         kube_file = "/tmp/%s.yaml" % name 
         with open(kube_file , "w") as f:
-            f.write(render_yaml("kubenetes/%s.yaml" % name, **VARS["environment"]))
+            f.write(render_yaml("kubernetes/%s.yaml" % name, **VARS))
         conn.put(kube_file, "/tmp")
         os.remove(kube_file)
         run_script(
@@ -275,7 +287,7 @@ def install_drycc():
     helm_install("drycc", "%s/workflow" % CHARS_URL, True)
 
 
-def install_all():
+def install_base():
     prepare()
     install_master()
     install_slaves()
@@ -285,7 +297,14 @@ def install_all():
     label_nodes()
     install_components()
     install_topolvm()
+
+
+def install_all():
+    install_base()
+    install_manager()
     install_drycc()
+    install_helmbroker()
+
 
 def clean_all():
     hosts = []
@@ -347,4 +366,4 @@ def main():
 
 if __name__ == "__main__":
     init()
-    print(render_yaml("helm/drycc.yaml", **VARS["environment"]))
+    print(render_yaml("kubernetes/catalog.yaml", **VARS))

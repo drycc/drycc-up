@@ -1,7 +1,7 @@
 replicas: 3
 celeryReplicas: 3
-username: {{HELMBROKER_USERNAME}}
-password: {{HELMBROKER_PASSWORD}}
+username: {{helmbroker.username}}
+password: {{helmbroker.password}}
 
 persistence:
   size: 20Gi
@@ -13,8 +13,8 @@ repositories:
 
 rabbitmq:
   replicas: 3
-  username: "{{RABBITMQ_USERNAME}}"
-  password: "{{RABBITMQ_PASSWORD}}"
+  username: drycc
+  password: {{64|random_ascii}}
   persistence:
     enabled: true # Set to true to enable persistence
     size: 5Gi # PVC size
@@ -22,7 +22,7 @@ rabbitmq:
 
 global:
   rabbitmqLocation: on-cluster
-  ingressClass: traefik
-  clusterDomain: cluster.local
-  platformDomain: {{HELMBROKER_PLATFORM_DOMAIN}}
-  certManagerEnabled: {{CERTMANAGER_ENABLED}}
+  ingressClass: {{global.ingressClass}}
+  clusterDomain: {{global.clusterDomain}}
+  platformDomain: {{helmbroker.platformDomain}}
+  certManagerEnabled: {{global.certManagerEnabled}}
