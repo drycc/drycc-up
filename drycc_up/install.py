@@ -89,11 +89,12 @@ def helm_install(name, chart_url, wait=False):
         user=VARS["user"],
         connect_kwargs={"key_filename": VARS["key_filename"]}
     ) as conn:
-        values_file = "/tmp/%s.yaml" % name 
-        with open(values_file , "w") as f:
+        values_file = "/tmp/%s.yaml" % name
+        local_values_file = "/tmp/%s-cache.yaml" % name
+        with open(local_values_file , "w") as f:
             f.write(render_yaml("helm/%s.yaml" % name, **VARS))
-        conn.put(values_file, "/tmp")
-        os.remove(values_file)
+        conn.put(local_values_file, values_file)
+        os.remove(local_values_file)
         command = "helm install %s %s -f %s -n %s --create-namespace" % (
             name,
             chart_url,
@@ -270,11 +271,12 @@ def install_helmbroker():
         connect_kwargs={"key_filename": VARS["key_filename"]}
     ) as conn:
         name = "catalog"
-        kube_file = "/tmp/%s.yaml" % name 
-        with open(kube_file , "w") as f:
+        kube_file = "/tmp/%s.yaml" % name
+        local_kube_file = "/tmp/%s-cache.yaml" % name
+        with open(local_kube_file , "w") as f:
             f.write(render_yaml("kubernetes/%s.yaml" % name, **VARS))
-        conn.put(kube_file, "/tmp")
-        os.remove(kube_file)
+        conn.put(local_kube_file, kube_file)
+        os.remove(local_kube_file)
         run_script(
             conn,
             "kubectl apply -f %s" % kube_file,
