@@ -253,7 +253,7 @@ def install_components():
     ) as conn:
         run_script(
             conn,
-            script("install_traefik", "install_cert_manager", "install_catalog"),
+            script("install_gateway", "install_cert_manager", "install_catalog"),
             out_stream=sys.stdout,
             asynchronous=True
         ).join()

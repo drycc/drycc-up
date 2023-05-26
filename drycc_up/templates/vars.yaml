@@ -33,7 +33,8 @@ label: []
 
 # share vars used by jinja2 template
 global:
-  ingressClass: traefik
+  email: drycc@zhumengyuan.com
+  gatewayClass: istio
   clusterDomain: cluster.local
   platformDomain: 192.168.6.230.nip.io
   certManagerEnabled: "false"
@@ -53,13 +54,15 @@ monitor:
     passportKey: {{40|random_ascii}}
     passportSecret: {{60|random_ascii}}
 
-manager:
-  platformDomain: manager.192.168.6.230.nip.io
-
 helmbroker:
   username: drycc
   password: {{32|random_ascii}}
-  platformDomain: helmbroker.192.168.6.230.nip.io
+
+acme:
+  server: https://acme.zerossl.com/v2/DV90
+  externalAccountBinding:
+    keyID: 8o92h5U8FNI61YlC2L9ydg
+    keySecret: 696aYm71pL4B0oARgx9-0YNPeqTkA7SheDAemfjU-mbbqZd4sZnml_aG6rShZ1BhEtlV2CwgJnJMolbhrhOcOg
 
 environment:
   # drycc

@@ -12,7 +12,7 @@ spec:
   relistBehavior: Duration
   relistRequests: 5
   {%- if global.certManagerEnabled == "true" %}
-  url: "https://{{helmbroker.username}}:{{helmbroker.password}}@drycc-helmbroker.{{helmbroker.platformDomain}}"
+  url: "https://{{helmbroker.username}}:{{helmbroker.password}}@drycc-helmbroker.{{global.platformDomain}}"
   {%- else %}
-  url: "http://{{helmbroker.username}}:{{helmbroker.password}}@drycc-helmbroker.{{helmbroker.platformDomain}}"
+  url: "http://{{helmbroker.username}}:{{helmbroker.password}}@drycc-helmbroker.{{global.platformDomain}}"
   {%- endif %}

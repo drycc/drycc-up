@@ -30,16 +30,16 @@ controller:
   appRuntimeClass: crun
   appStorageClass: drycc-storage
   {%- if global.certManagerEnabled == "true" %}
-  passportUrl: "https://drycc-passport.{{manager.platformDomain}}"
+  passportUrl: "https://drycc-passport.{{global.platformDomain}}"
   {%- else %}
-  passportUrl: "http://drycc-passport.{{manager.platformDomain}}"
+  passportUrl: "http://drycc-passport.{{global.platformDomain}}"
   {%- endif %}
   passportKey: {{controller.passportKey}}
   passportSecret: {{controller.passportSecret}}
   {%- if global.certManagerEnabled == "true" %}
-  workflowManagerUrl: "https://drycc-manager.{{manager.platformDomain}}/v1"
+  workflowManagerUrl: "https://drycc-manager.{{global.platformDomain}}/v1"
   {%- else %}
-  workflowManagerUrl: "http://drycc-manager.{{manager.platformDomain}}/v1"
+  workflowManagerUrl: "http://drycc-manager.{{global.platformDomain}}/v1"
   {%- endif %}
   workflowManagerAccessKey: {{controller.workflowManagerAccessKey}}
   workflowManagerSecretKey: {{controller.workflowManagerSecretKey}}
@@ -116,9 +116,9 @@ monitor:
   grafana:
     imageRegistry: registry.drycc.cc
     {%- if global.certManagerEnabled == "true" %}
-    passportUrl: "https://drycc-passport.{{manager.platformDomain}}"
+    passportUrl: "https://drycc-passport.{{global.platformDomain}}"
     {%- else %}
-    passportUrl: "http://drycc-passport.{{manager.platformDomain}}"
+    passportUrl: "http://drycc-passport.{{global.platformDomain}}"
     {%- endif %}
     passportKey: {{monitor.grafana.passportKey}}
     passportSecret: {{monitor.grafana.passportSecret}}
@@ -137,14 +137,15 @@ registry-proxy:
   imageRegistry: registry.drycc.cc
 
 acme:
-  server: https://acme.zerossl.com/v2/DV90
+  server: {{acme.server}}
   externalAccountBinding:
-    keyID: 8o92h5U8FNI61YlC2L9ydg
-    keySecret: 696aYm71pL4B0oARgx9-0YNPeqTkA7SheDAemfjU-mbbqZd4sZnml_aG6rShZ1BhEtlV2CwgJnJMolbhrhOcOg
+    keyID: {{acme.externalAccountBinding.keyID}}
+    keySecret: {{acme.externalAccountBinding.keySecret}}
 
 global:
+  email: {{global.email}}
   clusterDomain: {{global.clusterDomain}}
   platformDomain: {{global.platformDomain}}
   certManagerEnabled: {{global.certManagerEnabled}}
-  ingressClass: {{global.ingressClass}}
+  gatewayClass: {{global.gatewayClass}}
   passportLocation: "off-cluster"

@@ -20,9 +20,16 @@ rabbitmq:
     size: 5Gi # PVC size
     storageClass: "topolvm-ssd"
 
+acme:
+  server: {{acme.server}}
+  externalAccountBinding:
+    keyID: {{acme.externalAccountBinding.keyID}}
+    keySecret: {{acme.externalAccountBinding.keySecret}}
+
 global:
+  email: {{global.email}}
   rabbitmqLocation: on-cluster
-  ingressClass: {{global.ingressClass}}
+  gatewayClass: {{global.gatewayClass}}
   clusterDomain: {{global.clusterDomain}}
-  platformDomain: {{helmbroker.platformDomain}}
+  platformDomain: {{global.platformDomain}}
   certManagerEnabled: {{global.certManagerEnabled}}
