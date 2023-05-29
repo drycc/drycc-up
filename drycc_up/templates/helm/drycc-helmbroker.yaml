@@ -4,7 +4,7 @@ username: {{helmbroker.username}}
 password: {{helmbroker.password}}
 
 persistence:
-  size: 20Gi
+  size: 10Gi
   storageClass: drycc-storage
 
 repositories:
@@ -17,7 +17,7 @@ rabbitmq:
   password: {{64|random_ascii}}
   persistence:
     enabled: true # Set to true to enable persistence
-    size: 5Gi # PVC size
+    size: 8Gi # PVC size
     storageClass: "topolvm-ssd"
 
 acme:
@@ -31,5 +31,5 @@ global:
   rabbitmqLocation: on-cluster
   gatewayClass: {{global.gatewayClass}}
   clusterDomain: {{global.clusterDomain}}
-  platformDomain: {{global.platformDomain}}
+  platformDomain: {{global.helmbrokerDomain}}
   certManagerEnabled: {{global.certManagerEnabled}}

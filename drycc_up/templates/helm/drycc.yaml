@@ -1,11 +1,6 @@
 builder:
   replicas: 3
   imageRegistry: registry.drycc.cc
-  service:
-    type: LoadBalancer
-    annotations:
-      metallb.universe.tf/address-pool: public
-      metallb.universe.tf/allow-shared-ip: drycc
 
 database:
   replicas: 3
@@ -14,7 +9,7 @@ database:
   limitsHugepages2Mi: 256Mi
   persistence:
     enabled: true
-    size: 30Gi
+    size: 8Gi
     storageClass: topolvm-ssd
 
 fluentd:
@@ -30,16 +25,16 @@ controller:
   appRuntimeClass: crun
   appStorageClass: drycc-storage
   {%- if global.certManagerEnabled == "true" %}
-  passportUrl: "https://drycc-passport.{{global.platformDomain}}"
+  passportUrl: "https://drycc-passport.{{global.managerDomain}}"
   {%- else %}
-  passportUrl: "http://drycc-passport.{{global.platformDomain}}"
+  passportUrl: "http://drycc-passport.{{global.managerDomain}}"
   {%- endif %}
   passportKey: {{controller.passportKey}}
   passportSecret: {{controller.passportSecret}}
   {%- if global.certManagerEnabled == "true" %}
-  workflowManagerUrl: "https://drycc-manager.{{global.platformDomain}}/v1"
+  workflowManagerUrl: "https://drycc-manager.{{global.managerDomain}}/v1"
   {%- else %}
-  workflowManagerUrl: "http://drycc-manager.{{global.platformDomain}}/v1"
+  workflowManagerUrl: "http://drycc-manager.{{global.managerDomain}}/v1"
   {%- endif %}
   workflowManagerAccessKey: {{controller.workflowManagerAccessKey}}
   workflowManagerSecretKey: {{controller.workflowManagerSecretKey}}
@@ -49,7 +44,7 @@ redis:
   imageRegistry: registry.drycc.cc
   persistence:
     enabled: true
-    size: 32Gi
+    size: 8Gi
     storageClass: topolvm-ssd
 
 storage:
@@ -60,20 +55,20 @@ storage:
     imageRegistry: registry.drycc.cc
     persistence:
       enabled: true
-      size: 500Gi
-      storageClass: topolvm-hdd
+      size: 20Gi
+      storageClass: topolvm-ssd
   meta:
     pd:
       replicas: 3
       persistence:
         enabled: true
-        size: 100Gi
+        size: 10Gi
         storageClass: topolvm-ssd
     tikv:
       replicas: 3
       persistence:
         enabled: true
-        size: 100Gi
+        size: 10Gi
         storageClass: topolvm-ssd
 
 rabbitmq:
@@ -83,7 +78,7 @@ rabbitmq:
   password: {{64|random_ascii}}
   persistence:
     enabled: true
-    size: 32Gi
+    size: 8Gi
     storageClass: topolvm-ssd
 
 imagebuilder:
@@ -105,7 +100,7 @@ influxdb:
   password: {{64|random_ascii}}
   persistence:
     enabled: true
-    size: 64Gi
+    size: 8Gi
     storageClass: topolvm-ssd
 
 logger:
@@ -116,15 +111,15 @@ monitor:
   grafana:
     imageRegistry: registry.drycc.cc
     {%- if global.certManagerEnabled == "true" %}
-    passportUrl: "https://drycc-passport.{{global.platformDomain}}"
+    passportUrl: "https://drycc-passport.{{global.managerDomain}}"
     {%- else %}
-    passportUrl: "http://drycc-passport.{{global.platformDomain}}"
+    passportUrl: "http://drycc-passport.{{global.managerDomain}}"
     {%- endif %}
     passportKey: {{monitor.grafana.passportKey}}
     passportSecret: {{monitor.grafana.passportSecret}}
     persistence:
       enabled: true
-      size: 64Gi
+      size: 8Gi
       storageClass: topolvm-ssd
   telegraf:
     imageRegistry: registry.drycc.cc
@@ -145,7 +140,7 @@ acme:
 global:
   email: {{global.email}}
   clusterDomain: {{global.clusterDomain}}
-  platformDomain: {{global.platformDomain}}
+  platformDomain: {{global.workflowDomain}}
   certManagerEnabled: {{global.certManagerEnabled}}
   gatewayClass: {{global.gatewayClass}}
   passportLocation: "off-cluster"

@@ -68,6 +68,7 @@ def prepare():
                 run_script(
                     conn,
                     command,
+                    warn=True,
                     out_stream=sys.stdout,
                     asynchronous=True
                 ).join()
@@ -79,7 +80,7 @@ def get_token():
         user=VARS["user"],
         connect_kwargs={"key_filename": VARS["key_filename"]}
     ) as conn:
-        result = run_script(conn, "cat /var/lib/rancher/k3s/server/token", hide=True)
+        result = run_script(conn, "cat /var/lib/rancher/k3s/server/token", warn=True, hide=True)
         return result.stdout.strip()
 
 
@@ -106,6 +107,7 @@ def helm_install(name, chart_url, wait=False):
         run_script(
             conn,
             command,
+            warn=True,
             out_stream=sys.stdout,
             asynchronous=True
         ).join()
@@ -120,6 +122,7 @@ def install_master():
         run_script(
             conn,
             script("install_k3s_server", "install_helm"),
+            warn=True,
             out_stream=sys.stdout,
             asynchronous=True
         ).join()
@@ -136,6 +139,7 @@ def install_slaves():
                 conn,
                 script("install_k3s_server"),
                 envs={"K3S_URL": K3S_URL, "K3S_TOKEN": get_token()},
+                warn=True,
                 out_stream=sys.stdout,
                 asynchronous=True
             ).join()
@@ -152,6 +156,7 @@ def install_agents():
                 conn,
                 script("install_k3s_agent"),
                 envs={"K3S_URL": K3S_URL, "K3S_TOKEN": get_token()},
+                warn=True,
                 out_stream=sys.stdout,
                 asynchronous=True
             ).join()
@@ -171,6 +176,7 @@ def label_nodes():
                 run_script(
                     conn,
                     command,
+                    warn=True,
                     out_stream=sys.stdout,
                     asynchronous=True
                 ).join()
@@ -185,6 +191,7 @@ def install_network():
         run_script(
             conn,
             script("install_network"),
+            warn=True,
             out_stream=sys.stdout,
             asynchronous=True
         ).join()
@@ -203,6 +210,7 @@ def install_metallb():
             envs={
                 "METALLB_CONFIG_FILE": "/tmp/metallb.yaml",
             },
+            warn=True,
             out_stream=sys.stdout,
             asynchronous=True
         ).join()
@@ -219,6 +227,7 @@ def install_topolvm():
             conn,
             "curl -Ls https://drycc-mirrors.drycc.cc/topolvm/topolvm/releases|grep /topolvm/topolvm/releases/tag/",
             envs=None,
+            warn=True,
             out_stream=open(os.devnull, 'w'),
             asynchronous=False
         )
@@ -243,7 +252,8 @@ def install_topolvm():
             "cd -",
             "rm -rf topolvm-* tmp.tar.gz",
         ])
-        run_script(conn, script, envs=None, out_stream=sys.stdout, asynchronous=True).join()
+        run_script(
+            conn, script, envs=None, warn=True, out_stream=sys.stdout, asynchronous=True).join()
 
 def install_components():
     with Connection(
@@ -255,6 +265,7 @@ def install_components():
             conn,
             script("install_gateway", "install_cert_manager", "install_catalog"),
             out_stream=sys.stdout,
+            warn=True,
             asynchronous=True
         ).join()
 
@@ -280,6 +291,7 @@ def install_helmbroker():
         run_script(
             conn,
             "kubectl apply -f %s" % kube_file,
+            warn=True,
             out_stream=sys.stdout,
             asynchronous=True
         ).join()

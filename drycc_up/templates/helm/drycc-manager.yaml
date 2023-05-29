@@ -8,7 +8,7 @@ environment:
 # The following configurations are used to initialize the clusters
 initClusters:
 - name: local
-  url: "http://drycc.{{global.platformDomain}}"
+  url: "http://drycc.{{global.managerDomain}}"
   key: {{controller.workflowManagerAccessKey}}
   secret: {{controller.workflowManagerSecretKey}}
 
@@ -16,7 +16,7 @@ redis:
   replicas: 3
   persistence:
     enabled: true # Set to true to enable persistence
-    size: 10Gi
+    size: 8Gi
     storageClass: "topolvm-ssd"
 
 database:
@@ -25,7 +25,7 @@ database:
   initDatabases: "manager,passport"
   persistence:
     enabled: true # Set to true to enable persistence
-    size: 10Gi # PVC size
+    size: 8Gi # PVC size
     storageClass: "topolvm-ssd"
 
 rabbitmq:
@@ -34,7 +34,7 @@ rabbitmq:
   password: {{64|random_ascii}}
   persistence:
     enabled: true # Set to true to enable persistence
-    size: 5Gi # PVC size
+    size: 8Gi # PVC size
     storageClass: "topolvm-ssd"
 
 passport:
@@ -55,18 +55,18 @@ passport:
     secret: {{controller.passportSecret}}
     prefix: ""
     {%- if global.certManagerEnabled == "true" %}
-    redirect_uri: "https://drycc.{{global.platformDomain}}/v2/complete/drycc/"
+    redirect_uri: "https://drycc.{{global.managerDomain}}/v2/complete/drycc/"
     {%- else %}
-    redirect_uri: "http://drycc.{{global.platformDomain}}/v2/complete/drycc/"
+    redirect_uri: "http://drycc.{{global.managerDomain}}/v2/complete/drycc/"
     {%- endif %}
   - name: "grafana"
     key: {{monitor.grafana.passportKey}}
     secret: {{monitor.grafana.passportSecret}}
     prefix: ""
     {%- if global.certManagerEnabled == "true" %}
-    redirect_uri: "https://drycc-monitor-grafana.{{global.platformDomain}}/login/generic_oauth"
+    redirect_uri: "https://drycc-monitor-grafana.{{global.managerDomain}}/login/generic_oauth"
     {%- else %}
-    redirect_uri: "http://drycc-monitor-grafana.{{global.platformDomain}}/login/generic_oauth"
+    redirect_uri: "http://drycc-monitor-grafana.{{global.managerDomain}}/login/generic_oauth"
     {%- endif %}
 
 acme:
@@ -78,5 +78,5 @@ acme:
 global:
   email: {{global.email}}
   gatewayClass: {{global.gatewayClass}}
-  platformDomain: {{global.platformDomain}}
+  platformDomain: {{global.managerDomain}}
   certManagerEnabled: {{global.certManagerEnabled}}

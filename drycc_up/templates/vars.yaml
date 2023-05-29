@@ -2,30 +2,27 @@ user: root
 key_filename: /Users/duanhongyi/.ssh/id_rsa
 
 prepare:
-- host: 192.168.1.100
+- host: 43.154.180.247
   commands:
   - apt-get update; apt-get install lvm2 bc curl nfs-common open-iscsi -yq
-  - pvcreate /dev/nvme0n1 /dev/sda
-  - vgcreate lvmvg-hdd /dev/sda
-  - vgcreate lvmvg-ssd /dev/nvme0n1
-- host: 192.168.1.101
+  - pvcreate /dev/vdb
+  - vgcreate lvmvg-ssd /dev/vdb
+- host: 43.154.134.79
   commands:
   - apt-get update; apt-get install lvm2 bc curl nfs-common open-iscsi -yq
-  - pvcreate /dev/nvme0n1 /dev/sda
-  - vgcreate lvmvg-hdd /dev/sda
-  - vgcreate lvmvg-ssd /dev/nvme0n1
-- host: 192.168.1.102
+  - pvcreate /dev/vdb
+  - vgcreate lvmvg-ssd /dev/vdb
+- host: 43.159.195.254
   commands:
   - apt-get update; apt-get install lvm2 bc curl nfs-common open-iscsi -yq
-  - pvcreate /dev/nvme0n1 /dev/sda
-  - vgcreate lvmvg-hdd /dev/sda
-  - vgcreate lvmvg-ssd /dev/nvme0n1
+  - pvcreate /dev/vdb
+  - vgcreate lvmvg-ssd /dev/vdb
 
-master: 192.168.1.100
+master: 43.154.180.247
 
 slave:
-- 192.168.1.101
-- 192.168.1.102
+- 43.154.134.79
+- 43.159.195.254
 
 agent: []
 
@@ -36,7 +33,9 @@ global:
   email: drycc@zhumengyuan.com
   gatewayClass: istio
   clusterDomain: cluster.local
-  platformDomain: 192.168.6.230.nip.io
+  managerDomain: 43.154.180.247.nip.io
+  workflowDomain: 43.154.134.79.nip.io
+  helmbrokerDomain: 43.159.195.254.nip.io
   certManagerEnabled: "false"
 
 passport:
@@ -68,4 +67,3 @@ environment:
   # drycc
   CHANNEL: testing
   KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-  INSTALL_DRYCC_MIRROR: cn
