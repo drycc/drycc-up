@@ -20,12 +20,6 @@ rabbitmq:
     size: 8Gi # PVC size
     storageClass: "topolvm-ssd"
 
-acme:
-  server: {{acme.server}}
-  externalAccountBinding:
-    keyID: {{acme.externalAccountBinding.keyID}}
-    keySecret: {{acme.externalAccountBinding.keySecret}}
-
 global:
   email: {{global.email}}
   rabbitmqLocation: on-cluster

@@ -131,11 +131,12 @@ registry:
 registry-proxy:
   imageRegistry: registry.drycc.cc
 
-acme:
-  server: {{acme.server}}
-  externalAccountBinding:
-    keyID: {{acme.externalAccountBinding.keyID}}
-    keySecret: {{acme.externalAccountBinding.keySecret}}
+gateway:
+  acme:
+    server: {{acme.server}}
+    externalAccountBinding:
+      keyID: {{acme.externalAccountBinding.keyID}}
+      keySecret: {{acme.externalAccountBinding.keySecret}}
 
 global:
   email: {{global.email}}

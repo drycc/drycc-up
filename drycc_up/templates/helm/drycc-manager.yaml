@@ -69,11 +69,15 @@ passport:
     redirect_uri: "http://drycc-monitor-grafana.{{global.managerDomain}}/login/generic_oauth"
     {%- endif %}
 
-acme:
-  server: {{acme.server}}
-  externalAccountBinding:
-    keyID: {{acme.externalAccountBinding.keyID}}
-    keySecret: {{acme.externalAccountBinding.keySecret}}
+gateway:
+  acme:
+    server: {{acme.server}}
+    externalAccountBinding:
+      keyID: {{acme.externalAccountBinding.keyID}}
+      keySecret: {{acme.externalAccountBinding.keySecret}}
+  domainPrefixs:
+  - drycc-manager
+  - drycc-passport
 
 global:
   email: {{global.email}}
