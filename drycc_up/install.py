@@ -7,6 +7,7 @@ import pathlib
 import yaml
 import random
 import string
+from itertools import chain
 from jinja2 import Environment, FileSystemLoader
 from jinja2.filters import FILTERS
 from fabric.connection import Connection
@@ -111,6 +112,29 @@ def helm_install(name, chart_url, wait=False):
             out_stream=sys.stdout,
             asynchronous=True
         ).join()
+
+
+def install_rootfs():
+    for host in chain([VARS["master"], ], VARS["slave"], VARS["agent"]):
+        with Connection(
+            host=host,
+            user=VARS["user"],
+            connect_kwargs={"key_filename": VARS["key_filename"]}
+        ) as conn:
+            rootfs = os.path.join(INVENTORY, "rootfs")
+            for base_dir, _, files in os.walk(rootfs):
+                for file in files:
+                    dest_dir = base_dir.replace(rootfs, "")
+                    run_script(conn, "mkdir -p %s" % dest_dir, out_stream=sys.stdout)
+                    conn.put(os.path.join(base_dir, file), dest_dir)
+                    if dest_dir == "/etc/sysctl.conf" or dest_dir.startswith("/etc/sysctl.d"):
+                        run_script(
+                            conn,
+                            "sysctl -p %s" % os.path.join(dest_dir, file),
+                            warn=True,
+                            out_stream=sys.stdout,
+                            asynchronous=True
+                        ).join()
 
 
 def install_master():
@@ -303,6 +327,7 @@ def install_drycc():
 
 def install_base():
     prepare()
+    install_rootfs()
     install_master()
     install_slaves()
     install_agents()
