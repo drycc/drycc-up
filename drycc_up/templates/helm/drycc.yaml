@@ -7,7 +7,7 @@ database:
   imageRegistry: registry.drycc.cc
   limitsMemory: 256Mi
   limitsHugepages2Mi: 256Mi
-  initDatabases: "conroller"
+  initDatabases: "controller"
   persistence:
     enabled: true
     size: 8Gi
