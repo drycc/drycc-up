@@ -75,9 +75,29 @@ gateway:
     externalAccountBinding:
       keyID: {{acme.externalAccountBinding.keyID}}
       keySecret: {{acme.externalAccountBinding.keySecret}}
-  domainPrefixs:
-  - drycc-manager
-  - drycc-passport
+  # gateway apps
+  apps:
+  - name: drycc-manager-rabbitmq
+    port: 80
+    hostname: drycc-manager-rabbitmq.{{ .Values.global.platformDomain }}
+    protocol: HTTP
+    services:
+    - name: drycc-rabbitmq
+      port: 15672
+  - name: drycc-passport
+    port: 80
+    hostname: drycc-passport.{{ .Values.global.platformDomain }}
+    protocol: HTTP
+    services:
+    - name: drycc-passport
+      port: 80
+  - name: drycc-manager
+    port: 80
+    hostname: drycc-manager.{{ .Values.global.platformDomain }}
+    protocol: HTTP
+    services:
+    - name: drycc-manager
+      port: 80
 
 global:
   email: {{global.email}}
