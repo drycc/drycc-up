@@ -79,21 +79,21 @@ gateway:
   apps:
   - name: drycc-manager-rabbitmq
     port: 80
-    hostname: drycc-manager-rabbitmq.{{ .Values.global.platformDomain }}
+    hostname: drycc-manager-rabbitmq.{{global.managerDomain}}
     protocol: HTTP
     services:
     - name: drycc-rabbitmq
       port: 15672
   - name: drycc-passport
     port: 80
-    hostname: drycc-passport.{{ .Values.global.platformDomain }}
+    hostname: drycc-passport.{{global.managerDomain}}
     protocol: HTTP
     services:
     - name: drycc-passport
       port: 80
   - name: drycc-manager
     port: 80
-    hostname: drycc-manager.{{ .Values.global.platformDomain }}
+    hostname: drycc-manager.{{global.managerDomain}}
     protocol: HTTP
     services:
     - name: drycc-manager
