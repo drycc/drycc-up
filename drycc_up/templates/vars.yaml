@@ -26,7 +26,25 @@ slave:
 
 agent: []
 
-label: []
+label:
+- node: node1
+  labels:
+  - key: topology.kubernetes.io/zone
+    value: "zone1"
+  - key: topology.kubernetes.io/rack
+    value: "rack1"
+- node: node2
+  labels:
+  - key: topology.kubernetes.io/zone
+    value: "zone1"
+  - key: topology.kubernetes.io/rack
+    value: "rack1"
+- node: node3
+  labels:
+  - key: topology.kubernetes.io/zone
+    value: "zone1"
+  - key: topology.kubernetes.io/rack
+    value: "rack1"
 
 # share vars used by jinja2 template
 global:

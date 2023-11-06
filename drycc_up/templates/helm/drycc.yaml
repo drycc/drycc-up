@@ -13,10 +13,8 @@ database:
     size: 8Gi
     storageClass: topolvm-ssd
 
-fluentd:
-  imageRegistry: registry.drycc.cc 
-  daemonEnvironment:
-    CONTAINER_TAIL_PARSER_TYPE: "/^(?<time>.+) (?<stream>stdout|stderr)( (?<tags>.))? (?<log>.*)$/"
+fluentbit:
+  imageRegistry: registry.drycc.cc
 
 controller:
   apiReplicas: 3
@@ -49,28 +47,32 @@ redis:
     storageClass: topolvm-ssd
 
 storage:
-  minio:
-    zone: 1
-    drives: 4
-    replicas: 3
-    imageRegistry: registry.drycc.cc
-    persistence:
-      enabled: true
-      size: 20Gi
-      storageClass: topolvm-ssd
-  meta:
-    pd:
+  # drycc storage csi driver
+  csi:
+    driverName: storage.drycc.cc
+    dataLocality: "none"
+    storageClassName: drycc-storage
+  # mainnode seaweedfs master & tipd
+  mainnode:
+    tipd:
       replicas: 3
+      # persistence config
       persistence:
         enabled: true
-        size: 10Gi
-        storageClass: topolvm-ssd
-    tikv:
+        size: 5Gi
+        storageClass: ""
+    weed:
       replicas: 3
+      # Storage replication type is XYZ:
+      # X number of replica in other data centers
+      # Y number of replica in other racks in the same data center
+      # Z number of replica in other servers in the same rack
+      defaultReplication: "001"
+      # persistence config
       persistence:
         enabled: true
-        size: 10Gi
-        storageClass: topolvm-ssd
+        size: 5Gi
+        storageClass: ""
 
 rabbitmq:
   replicas: 3
@@ -150,28 +152,28 @@ gateway:
         port: 2222
     - name: drycc-controller
       port: 80
-      hostname: drycc.{{ .Values.global.platformDomain }}
+      hostname: drycc.{{global.workflowDomain}}
       protocol: HTTP
       services:
       - name: drycc-controller-api
         port: 80
     - name: drycc-rabbitmq
       port: 80
-      hostname: drycc-rabbitmq.{{ .Values.global.platformDomain }}
+      hostname: drycc-rabbitmq.{{global.workflowDomain}}
       protocol: HTTP
       services:
       - name: drycc-rabbitmq
         port: 15672
     - name: drycc-prometheus
       port: 80
-      hostname: drycc-prometheus.{{ .Values.global.platformDomain }}
+      hostname: drycc-prometheus.{{global.workflowDomain}}
       protocol: HTTP
       services:
       - name: drycc-prometheus
         port: 9090
     - name: drycc-monitor-grafana
       port: 80
-      hostname: drycc-monitor-grafana.{{ .Values.global.platformDomain }}
+      hostname: drycc-monitor-grafana.{{global.workflowDomain}}
       protocol: HTTP
       services:
       - name: drycc-monitor-grafana
