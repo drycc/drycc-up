@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kube-api-proxy
+spec:
+  selector:
+    matchLabels:
+      name: kube-api-proxy
+  template:
+    metadata:
+      labels:
+        name: kube-api-proxy
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/master
+                operator: DoesNotExist
+      containers:
+      - name: kube-api-proxy
+        image: registry.drycc.cc/library/nginx:latest
+        ports:
+        - containerPort: {{ apiserver.proxyPort }}
+          hostPort: {{ apiserver.proxyPort }}
+        args:
+        - bash
+        - -ec
+        - |
+          rm -rf /etc/nginx/*
+          cat << EOF > "/etc/nginx/nginx.conf"
+          user  root;
+          worker_processes 1;
+          error_log  /dev/stderr  error;
+          events {
+              use epoll;
+              multi_accept on;
+              worker_connections  1024;
+          }
+          stream {
+            upstream kube-api-backends {
+              least_conn;
+              server {{ master }}:{{ apiserver.proxyPort }};
+              {%- for server in slave %}
+              server {{ server }}:{{ apiserver.proxyPort }};
+              {%- endfor %}
+            }
+            server {
+              listen {{ apiserver.proxyPort }};
+              proxy_timeout 60s;
+              proxy_pass kube-api-backends;
+            }
+          }
+          EOF
+          nginx -g "daemon off;"

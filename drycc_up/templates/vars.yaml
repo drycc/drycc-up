@@ -66,6 +66,9 @@ controller:
   workflowManagerAccessKey: {{4|uuid}}
   workflowManagerSecretKey: {{64|random_ascii}}
 
+apiserver:
+  proxyPort: 6443
+
 monitor:
   grafana:
     passportKey: {{40|random_ascii}}

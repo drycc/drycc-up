@@ -321,6 +321,28 @@ def install_helmbroker():
         ).join()
 
 
+def install_kube_api_proxy():
+    name = "kube-api-proxy"
+    kube_file = "/tmp/%s.yaml" % name
+    local_kube_file = "/tmp/%s-cache.yaml" % name
+    with open(local_kube_file , "w") as f:
+        f.write(render_yaml("kubernetes/%s.yaml" % name, **VARS))
+    with Connection(
+        host=VARS["master"],
+        user=VARS["user"],
+        connect_kwargs={"key_filename": VARS["key_filename"]}
+    ) as conn:
+        conn.put(local_kube_file, kube_file)
+        os.remove(local_kube_file)
+        run_script(
+            conn,
+            "kubectl apply -f %s" % kube_file,
+            warn=True,
+            out_stream=sys.stdout,
+            asynchronous=True
+        ).join()
+
+
 def install_drycc():
     helm_install("drycc", "%s/workflow" % CHARS_URL, True)
 
@@ -331,6 +353,7 @@ def install_base():
     install_master()
     install_slaves()
     install_agents()
+    install_kube_api_proxy()
     install_network()
     install_metallb()
     label_nodes()
@@ -405,4 +428,4 @@ def main():
 
 if __name__ == "__main__":
     init()
-    print(render_yaml("kubernetes/catalog.yaml", **VARS))
+    print(render_yaml("kubernetes/kube-api-proxy.yaml", **VARS))
