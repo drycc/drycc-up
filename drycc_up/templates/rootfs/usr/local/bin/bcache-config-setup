@@ -1,0 +1,20 @@
+#!/bin/bash
+
+rm -rf /etc/tmpfiles.d/bcache.conf
+touch /etc/tmpfiles.d/bcache.conf
+for device in $(ls /sys/block/ |grep -E ^bcache[0-9]+$)
+do
+cat << EOF >> "/etc/tmpfiles.d/bcache.conf"
+w /sys/block/$device/bcache/cache_mode  - - - - writeback
+w /sys/block/$device/bcache/sequential_cutoff  - - - - 0
+EOF
+done
+
+for uuid in $(ls /sys/fs/bcache/ |grep -E ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$)
+do
+cat << EOF >> "/etc/tmpfiles.d/bcache.conf"
+w /sys/fs/bcache/$uuid/congested_read_threshold_us  - - - - 0
+w /sys/fs/bcache/$uuid/congested_write_threshold_us  - - - - 0
+EOF
+done
+systemd-tmpfiles --create --remove

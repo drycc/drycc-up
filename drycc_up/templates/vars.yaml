@@ -5,18 +5,24 @@ prepare:
 - host: 43.154.180.247
   commands:
   - apt-get update; apt-get install lvm2 bc curl nfs-common open-iscsi -yq
-  - pvcreate /dev/vdb
-  - vgcreate lvmvg-ssd /dev/vdb
+  - make-bcache -C /dev/sda /dev/sdb -B /dev/sdc /dev/sdd --writeback
+  - pvcreate /dev/bcache0 /dev/bcache1
+  - vgcreate lvmvg-bcache /dev/bcache0 /dev/bcache1
+  - bcache-config-setup
 - host: 43.154.134.79
   commands:
   - apt-get update; apt-get install lvm2 bc curl nfs-common open-iscsi -yq
-  - pvcreate /dev/vdb
-  - vgcreate lvmvg-ssd /dev/vdb
+  - make-bcache -C /dev/sda /dev/sdb -B /dev/sdc /dev/sdd --writeback
+  - pvcreate /dev/bcache0 /dev/bcache1
+  - vgcreate lvmvg-bcache /dev/bcache0 /dev/bcache1
+  - bcache-config-setup
 - host: 43.159.195.254
   commands:
   - apt-get update; apt-get install lvm2 bc curl nfs-common open-iscsi -yq
-  - pvcreate /dev/vdb
-  - vgcreate lvmvg-ssd /dev/vdb
+  - make-bcache -C /dev/sda /dev/sdb -B /dev/sdc /dev/sdd --writeback
+  - pvcreate /dev/bcache0 /dev/bcache1
+  - vgcreate lvmvg-bcache /dev/bcache0 /dev/bcache1
+  - bcache-config-setup
 
 master: 43.154.180.247
 

@@ -31,3 +31,10 @@ drycc-up run install_all
 ```
 
 See the install.py file for other functions.
+
+## Best practices
+
+* Suggest using BGP network when conditions permit.
+* Suggest deploying no less than 4 nodes for the first time.
+* Suggest that the number of slave nodes should not be less than 2.
+* When there are both fast and slow disks, it is recommended to use bcache.

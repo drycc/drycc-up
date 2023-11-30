@@ -348,8 +348,8 @@ def install_drycc():
 
 
 def install_base():
-    prepare()
     install_rootfs()
+    prepare()
     install_master()
     install_slaves()
     install_agents()
