@@ -129,6 +129,21 @@ monitor:
   telegraf:
     imageRegistry: registry.drycc.cc
 
+prometheus:
+  imageRegistry: registry.drycc.cc
+  # The username and password to be used by the on-cluster database.
+  username: "drycc"
+  password: {{64|random_ascii}}
+  prometheusServer:
+    replicas: 1
+    retention: 15d
+    # persistence config
+    persistence:
+      enabled: true
+      accessMode: ReadWriteOnce
+      size: 10Gi
+      storageClass: ""
+
 registry:
   replicas: 3
   imageRegistry: registry.drycc.cc
