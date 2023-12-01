@@ -1,7 +1,39 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: kube-api-proxy
+  namespace: kube-system
+data:
+  nginx.conf: |
+    user  root;
+    worker_processes 1;
+    error_log  /dev/stderr  error;
+    events {
+        use epoll;
+        multi_accept on;
+        worker_connections  1024;
+    }
+    stream {
+      upstream kube-api-backends {
+        least_conn;
+        server {{ master }}:{{ apiserver.port }} max_fails=3 fail_timeout=10s weight=5;
+        {%- for server in slave %}
+        server {{ server }}:{{ apiserver.port }} max_fails=3 fail_timeout=10s weight=5;
+        {%- endfor %}
+      }
+      server {
+        listen {{ apiserver.proxyPort }};
+        proxy_timeout 60s;
+        proxy_pass kube-api-backends;
+      }
+    }
+
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: kube-api-proxy
+  namespace: kube-system
 spec:
   selector:
     matchLabels:
@@ -11,6 +43,7 @@ spec:
       labels:
         name: kube-api-proxy
     spec:
+      {%- if apiserver.port == apiserver.proxyPort %}
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -18,39 +51,52 @@ spec:
             - matchExpressions:
               - key: node-role.kubernetes.io/master
                 operator: DoesNotExist
+      {%- endif %}
+      shareProcessNamespace: true
       containers:
+      - name: reloader
+        image: registry.drycc.cc/library/nginx:latest
+        command:
+        - bash
+        - -ec
+        - |
+          apt update && apt install inotify-tools -yq
+          oldcksum="$(cksum /etc/nginx/nginx.conf)"
+          # When a change happens, reload the server
+          inotifywait -mr -e 'modify,move,create,delete' --timefmt '%Y-%m-%d %H:%M' --format '%T %w%f %e' /etc/nginx/ | while read date time; do
+            newcksum="$(cksum /etc/nginx/nginx.conf)"
+            if [ "$newcksum" != "$oldcksum" ]; then
+              echo "Nginx config udated [${time} ${date}]."
+              oldcksum="$newcksum"
+              nginx -t
+              if [[ $? -eq 0 ]] ; then
+                nginx -s reload
+              fi
+            fi
+          done
+        volumeMounts:
+        - mountPath: /etc/nginx
+          name: config
+        - mountPath: /var/run
+          name: run
       - name: kube-api-proxy
         image: registry.drycc.cc/library/nginx:latest
         ports:
         - containerPort: {{ apiserver.proxyPort }}
           hostPort: {{ apiserver.proxyPort }}
-        args:
+        command:
         - bash
         - -ec
         - |
-          rm -rf /etc/nginx/*
-          cat << EOF > "/etc/nginx/nginx.conf"
-          user  root;
-          worker_processes 1;
-          error_log  /dev/stderr  error;
-          events {
-              use epoll;
-              multi_accept on;
-              worker_connections  1024;
-          }
-          stream {
-            upstream kube-api-backends {
-              least_conn;
-              server {{ master }}:{{ apiserver.proxyPort }};
-              {%- for server in slave %}
-              server {{ server }}:{{ apiserver.proxyPort }};
-              {%- endfor %}
-            }
-            server {
-              listen {{ apiserver.proxyPort }};
-              proxy_timeout 60s;
-              proxy_pass kube-api-backends;
-            }
-          }
-          EOF
           nginx -g "daemon off;"
+        volumeMounts:
+        - mountPath: /etc/nginx
+          name: config
+        - mountPath: /var/run
+          name: run
+      volumes:
+      - configMap:
+          name: kube-api-proxy
+        name: config
+      - name: run
+        emptyDir: {}

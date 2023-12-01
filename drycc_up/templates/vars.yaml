@@ -73,6 +73,7 @@ controller:
   workflowManagerSecretKey: {{64|random_ascii}}
 
 apiserver:
+  port: 6443
   proxyPort: 6443
 
 monitor:
