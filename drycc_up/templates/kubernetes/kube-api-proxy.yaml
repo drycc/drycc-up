@@ -94,6 +94,7 @@ spec:
           name: config
         - mountPath: /var/run
           name: run
+      hostNetwork: true
       volumes:
       - configMap:
           name: kube-api-proxy
