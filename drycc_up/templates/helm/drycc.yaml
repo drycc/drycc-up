@@ -47,11 +47,7 @@ redis:
     storageClass: topolvm-ssd
 
 storage:
-  # drycc storage csi driver
-  csi:
-    driverName: storage.drycc.cc
-    dataLocality: "none"
-    storageClassName: drycc-storage
+  imageRegistry: registry.drycc.cc
   # mainnode seaweedfs master & tipd
   mainnode:
     tipd:
@@ -59,20 +55,42 @@ storage:
       # persistence config
       persistence:
         enabled: true
-        size: 5Gi
-        storageClass: ""
+        size: 15Gi
+        storageClass: topolvm-ssd
     weed:
       replicas: 3
       # Storage replication type is XYZ:
       # X number of replica in other data centers
       # Y number of replica in other racks in the same data center
       # Z number of replica in other servers in the same rack
-      defaultReplication: "001"
+      defaultReplication: "000"
       # persistence config
       persistence:
         enabled: true
-        size: 5Gi
-        storageClass: ""
+        size: 15Gi
+        storageClass: topolvm-ssd
+  metanode:
+    tikv:
+      replicas: 3
+      persistence:
+        enabled: true
+        size: 15Gi
+        storageClass: topolvm-ssd
+    weed:
+      replicas: 3
+      persistence:
+        enabled: true
+        size: 15Gi
+        storageClass: topolvm-ssd
+  # datanode: seaweedfs volume
+  datanode:
+    weed:
+      replicas: 4
+      # persistence config
+      persistence:
+        enabled: true
+        size: 100Gi
+        storageClass: topolvm-ssd
 
 rabbitmq:
   replicas: 3
