@@ -38,7 +38,7 @@ controller:
   workflowManagerAccessKey: {{controller.workflowManagerAccessKey}}
   workflowManagerSecretKey: {{controller.workflowManagerSecretKey}}
 
-redis:
+valkey:
   replicas: 3
   imageRegistry: registry.drycc.cc
   persistence:

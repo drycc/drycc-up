@@ -12,7 +12,7 @@ initClusters:
   key: {{controller.workflowManagerAccessKey}}
   secret: {{controller.workflowManagerSecretKey}}
 
-redis:
+valkey:
   replicas: 3
   persistence:
     enabled: true # Set to true to enable persistence
