@@ -28,15 +28,6 @@ database:
     size: 8Gi # PVC size
     storageClass: "topolvm-ssd"
 
-rabbitmq:
-  replicas: 3
-  username: drycc
-  password: {{64|random_ascii}}
-  persistence:
-    enabled: true # Set to true to enable persistence
-    size: 8Gi # PVC size
-    storageClass: "topolvm-ssd"
-
 passport:
   replicas: 3
   adminUsername: {{passport.adminUsername}}
@@ -77,13 +68,6 @@ gateway:
       keySecret: {{acme.externalAccountBinding.keySecret}}
   # gateway apps
   apps:
-  - name: drycc-manager-rabbitmq
-    port: 80
-    hostname: drycc-manager-rabbitmq.{{global.managerDomain}}
-    protocol: HTTP
-    services:
-    - name: drycc-rabbitmq
-      port: 15672
   - name: drycc-passport
     port: 80
     hostname: drycc-passport.{{global.managerDomain}}
