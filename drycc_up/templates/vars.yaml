@@ -76,10 +76,9 @@ apiserver:
   port: 6443
   proxyPort: 6443
 
-monitor:
-  grafana:
-    passportKey: {{40|random_ascii}}
-    passportSecret: {{60|random_ascii}}
+grafana:
+  passportKey: {{40|random_ascii}}
+  passportSecret: {{60|random_ascii}}
 
 helmbroker:
   username: drycc

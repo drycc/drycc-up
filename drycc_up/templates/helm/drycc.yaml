@@ -120,22 +120,19 @@ logger:
   replicas: 3
   imageRegistry: registry.drycc.cc
 
-monitor:
-  grafana:
-    imageRegistry: registry.drycc.cc
-    {%- if global.certManagerEnabled == "true" %}
-    passportUrl: "https://drycc-passport.{{global.managerDomain}}"
-    {%- else %}
-    passportUrl: "http://drycc-passport.{{global.managerDomain}}"
-    {%- endif %}
-    passportKey: {{monitor.grafana.passportKey}}
-    passportSecret: {{monitor.grafana.passportSecret}}
-    persistence:
-      enabled: true
-      size: 8Gi
-      storageClass: topolvm-ssd
-  telegraf:
-    imageRegistry: registry.drycc.cc
+grafana:
+  imageRegistry: registry.drycc.cc
+  {%- if global.certManagerEnabled == "true" %}
+  passportUrl: "https://drycc-passport.{{global.managerDomain}}"
+  {%- else %}
+  passportUrl: "http://drycc-passport.{{global.managerDomain}}"
+  {%- endif %}
+  passportKey: {{monitor.grafana.passportKey}}
+  passportSecret: {{monitor.grafana.passportSecret}}
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClass: topolvm-ssd
 
 prometheus:
   imageRegistry: registry.drycc.cc
