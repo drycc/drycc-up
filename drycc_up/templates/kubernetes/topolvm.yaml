@@ -28,14 +28,14 @@ priorityClass:
 storageClasses:
   - name: topolvm-ssd
     storageClass:
-      fsType: xfs
+      fsType: ext4
       reclaimPolicy:
       annotations: {}
       isDefaultClass: false
       volumeBindingMode: WaitForFirstConsumer
       allowVolumeExpansion: true
       additionalParameters:
-        "topolvm.cybozu.com/device-class": "ssd"
+        "topolvm.io/device-class": "ssd"
 
 cert-manager:
   enabled: false
