@@ -5,7 +5,7 @@ touch /etc/tmpfiles.d/bcache.conf
 for device in $(ls /sys/block/ |grep -E ^bcache[0-9]+$)
 do
 cat << EOF >> "/etc/tmpfiles.d/bcache.conf"
-w /sys/block/$device/bcache/cache_mode  - - - - writeback
+w /sys/block/$device/bcache/cache_mode  - - - - writethrough
 w /sys/block/$device/bcache/sequential_cutoff  - - - - 0
 EOF
 done
