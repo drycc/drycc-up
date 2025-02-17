@@ -44,21 +44,15 @@ passport:
   - name: "controller"
     key: {{controller.passportKey}}
     secret: {{controller.passportSecret}}
-    prefix: ""
-    {%- if global.certManagerEnabled == "true" %}
-    redirect_uri: "https://drycc.{{global.workflowDomain}}/v2/complete/drycc/"
-    {%- else %}
-    redirect_uri: "http://drycc.{{global.workflowDomain}}/v2/complete/drycc/"
-    {%- endif %}
+    grant_type: "password"
+    prefix: "drycc"
+    redirect_uri: "/v2/complete/drycc/"
   - name: "grafana"
-    key: {{monitor.grafana.passportKey}}
-    secret: {{monitor.grafana.passportSecret}}
-    prefix: ""
-    {%- if global.certManagerEnabled == "true" %}
-    redirect_uri: "https://drycc-monitor-grafana.{{global.workflowDomain}}/login/generic_oauth"
-    {%- else %}
-    redirect_uri: "http://drycc-monitor-grafana.{{global.workflowDomain}}/login/generic_oauth"
-    {%- endif %}
+    key: {{grafana.passportKey}}
+    secret: {{grafana.passportSecret}}
+    grant_type: "authorization-code"
+    prefix: "drycc-grafana"
+    redirect_uri: "/login/generic_oauth"
 
 gateway:
   acme:
