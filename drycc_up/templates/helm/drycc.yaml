@@ -127,8 +127,8 @@ grafana:
   {%- else %}
   passportUrl: "http://drycc-passport.{{global.managerDomain}}"
   {%- endif %}
-  passportKey: {{monitor.grafana.passportKey}}
-  passportSecret: {{monitor.grafana.passportSecret}}
+  passportKey: {{grafana.passportKey}}
+  passportSecret: {{grafana.passportSecret}}
   persistence:
     enabled: true
     size: 8Gi
@@ -184,12 +184,12 @@ gateway:
       services:
       - name: drycc-prometheus
         port: 9090
-    - name: drycc-monitor-grafana
+    - name: drycc-grafana
       port: 80
-      hostname: drycc-monitor-grafana.{{global.workflowDomain}}
+      hostname: drycc-grafana.{{global.workflowDomain}}
       protocol: HTTP
       services:
-      - name: drycc-monitor-grafana
+      - name: drycc-grafana
         port: 80
 
 global:
