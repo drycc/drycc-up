@@ -104,18 +104,6 @@ imagebuilder:
     prefix = "docker.io"
     location = "hub-mirror.c.163.com"
 
-timeseries:
-  mainReplicas: 2
-  nodeReplicas: 3
-  imageRegistry: registry.drycc.cc
-  limitsMemory: 256Mi
-  limitsHugepages2Mi: 256Mi
-  initDatabases: "monitor"
-  persistence:
-    enabled: true
-    size: 8Gi
-    storageClass: topolvm-ssd
-
 logger:
   replicas: 3
   imageRegistry: registry.drycc.cc
