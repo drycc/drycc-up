@@ -11,6 +11,14 @@ repositories:
 - name: drycc-helm-broker
   url: https://drycc-mirrors.drycc.cc/drycc-addons/addons/releases/download/latest/index.yaml
 
+valkey:
+  replicas: 3
+  imageRegistry: registry.drycc.cc
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClass: topolvm-ssd
+
 global:
   email: {{global.email}}
   gatewayClass: {{global.gatewayClass}}
