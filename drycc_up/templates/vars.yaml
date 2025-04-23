@@ -72,6 +72,11 @@ controller:
   workflowManagerAccessKey: {{4|uuid}}
   workflowManagerSecretKey: {{64|random_ascii}}
 
+
+storage:
+  accesskey: {{32|random_ascii}}
+  secretkey: {{32|random_ascii}}
+
 apiserver:
   port: 6443
   proxyPort: 6443
@@ -79,6 +84,9 @@ apiserver:
 grafana:
   passportKey: {{40|random_ascii}}
   passportSecret: {{60|random_ascii}}
+
+prometheus:
+  password: {{64|random_ascii}}
 
 helmbroker:
   username: drycc
