@@ -22,7 +22,7 @@ controller:
   webhookReplicas: 3
   imageRegistry: registry.drycc.cc
   appRuntimeClass: crun
-  appStorageClass: drycc-storage
+  appStorageClass: longhorn
   {%- if global.certManagerEnabled == "true" %}
   passportUrl: "https://drycc-passport.{{global.managerDomain}}"
   {%- else %}
@@ -48,49 +48,8 @@ valkey:
 
 storage:
   imageRegistry: registry.drycc.cc
-  # mainnode seaweedfs master & tipd
-  mainnode:
-    tipd:
-      replicas: 3
-      # persistence config
-      persistence:
-        enabled: true
-        size: 15Gi
-        storageClass: topolvm-ssd
-    weed:
-      replicas: 3
-      # Storage replication type is XYZ:
-      # X number of replica in other data centers
-      # Y number of replica in other racks in the same data center
-      # Z number of replica in other servers in the same rack
-      defaultReplication: "000"
-      # persistence config
-      persistence:
-        enabled: true
-        size: 15Gi
-        storageClass: topolvm-ssd
-  metanode:
-    tikv:
-      replicas: 3
-      persistence:
-        enabled: true
-        size: 15Gi
-        storageClass: topolvm-ssd
-    weed:
-      replicas: 3
-      persistence:
-        enabled: true
-        size: 15Gi
-        storageClass: topolvm-ssd
-  # datanode: seaweedfs volume
-  datanode:
-    weed:
-      replicas: 4
-      # persistence config
-      persistence:
-        enabled: true
-        size: 100Gi
-        storageClass: topolvm-ssd
+  accesskey: {{storage.accesskey}}
+  secretkey: {{storage.secretkey}}
 
 imagebuilder:
   imageRegistry: registry.drycc.cc
@@ -126,9 +85,9 @@ prometheus:
   imageRegistry: registry.drycc.cc
   # The username and password to be used by the on-cluster database.
   username: "drycc"
-  password: {{64|random_ascii}}
+  password: {{prometheus.password}}
   prometheusServer:
-    replicas: 1
+    replicas: 2
     retention: 15d
     # persistence config
     persistence:

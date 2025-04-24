@@ -5,7 +5,7 @@ password: {{helmbroker.password}}
 
 persistence:
   size: 10Gi
-  storageClass: drycc-storage
+  storageClass: longhorn
 
 repositories:
 - name: drycc-helm-broker
