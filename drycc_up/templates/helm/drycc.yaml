@@ -5,8 +5,10 @@ builder:
 database:
   replicas: 3
   imageRegistry: registry.drycc.cc
-  limitsMemory: 256Mi
-  limitsHugepages2Mi: 256Mi
+  resources:
+    limits:
+      memory: 256Mi
+      hugepages-2Mi: 256Mi
   initDatabases: "controller"
   persistence:
     enabled: true
@@ -100,6 +102,9 @@ registry:
   replicas: 3
   imageRegistry: registry.drycc.cc
 
+passport:
+  enabled: false
+
 registry-proxy:
   imageRegistry: registry.drycc.cc
 
@@ -145,4 +150,3 @@ global:
   platformDomain: {{global.workflowDomain}}
   certManagerEnabled: {{global.certManagerEnabled}}
   gatewayClass: {{global.gatewayClass}}
-  passportLocation: "off-cluster"

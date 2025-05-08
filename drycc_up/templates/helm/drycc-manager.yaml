@@ -20,8 +20,10 @@ valkey:
     storageClass: "topolvm-ssd"
 
 database:
-  limitsMemory: "256Mi"
-  limitsHugepages2Mi: "256Mi"
+  resources:
+    limits:
+      memory: 256Mi
+      hugepages-2Mi: 256Mi
   initDatabases: "manager,passport"
   persistence:
     enabled: true # Set to true to enable persistence
