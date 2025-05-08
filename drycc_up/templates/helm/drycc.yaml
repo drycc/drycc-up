@@ -100,6 +100,9 @@ registry:
   replicas: 3
   imageRegistry: registry.drycc.cc
 
+passport:
+  enabled: false
+
 registry-proxy:
   imageRegistry: registry.drycc.cc
 
@@ -145,4 +148,3 @@ global:
   platformDomain: {{global.workflowDomain}}
   certManagerEnabled: {{global.certManagerEnabled}}
   gatewayClass: {{global.gatewayClass}}
-  passportLocation: "off-cluster"
