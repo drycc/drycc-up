@@ -19,9 +19,11 @@ valkey:
     size: 8Gi
     storageClass: topolvm-ssd
 
+gateway:
+  gatewayClass: {{gateway.gatewayClass}}
+
 global:
   email: {{global.email}}
-  gatewayClass: {{global.gatewayClass}}
   clusterDomain: {{global.clusterDomain}}
   platformDomain: {{global.helmbrokerDomain}}
   certManagerEnabled: {{global.certManagerEnabled}}

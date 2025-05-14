@@ -55,12 +55,14 @@ label:
 # share vars used by jinja2 template
 global:
   email: drycc@zhumengyuan.com
-  gatewayClass: istio
   clusterDomain: cluster.local
   managerDomain: 43.154.180.247.nip.io
   workflowDomain: 43.154.134.79.nip.io
   helmbrokerDomain: 43.159.195.254.nip.io
   certManagerEnabled: "false"
+
+gateway:
+  gatewayClass: istio
 
 passport:
   adminUsername: drycc
@@ -69,6 +71,7 @@ passport:
 controller:
   passportKey: {{40|random_ascii}}
   passportSecret: {{60|random_ascii}}
+  appGatewayClass: istio
   workflowManagerAccessKey: {{4|uuid}}
   workflowManagerSecretKey: {{64|random_ascii}}
 
@@ -84,9 +87,6 @@ apiserver:
 grafana:
   passportKey: {{40|random_ascii}}
   passportSecret: {{60|random_ascii}}
-
-prometheus:
-  password: {{64|random_ascii}}
 
 helmbroker:
   username: drycc

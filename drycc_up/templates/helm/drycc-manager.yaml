@@ -57,6 +57,7 @@ passport:
     redirect_uri: "/login/generic_oauth"
 
 gateway:
+  gatewayClass: {{gateway.gatewayClass}}
   acme:
     server: {{acme.server}}
     externalAccountBinding:
@@ -81,6 +82,5 @@ gateway:
 
 global:
   email: {{global.email}}
-  gatewayClass: {{global.gatewayClass}}
   platformDomain: {{global.managerDomain}}
   certManagerEnabled: {{global.certManagerEnabled}}

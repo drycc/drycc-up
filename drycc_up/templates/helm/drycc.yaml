@@ -2,6 +2,9 @@ builder:
   replicas: 3
   imageRegistry: registry.drycc.cc
 
+gateway:
+  gatewayClass: {{gateway.gatewayClass}}
+
 database:
   replicas: 3
   imageRegistry: registry.drycc.cc
@@ -24,6 +27,7 @@ controller:
   webhookReplicas: 3
   imageRegistry: registry.drycc.cc
   appRuntimeClass: crun
+  appGatewayClass: {{controller.appGatewayClass}}
   appStorageClass: longhorn
   {%- if global.certManagerEnabled == "true" %}
   passportUrl: "https://drycc-passport.{{global.managerDomain}}"
@@ -83,20 +87,29 @@ grafana:
     size: 8Gi
     storageClass: topolvm-ssd
 
-prometheus:
+victoriametrics:
+  enabled: true
   imageRegistry: registry.drycc.cc
-  # The username and password to be used by the on-cluster database.
-  username: "drycc"
-  password: {{prometheus.password}}
-  prometheusServer:
-    replicas: 2
-    retention: 15d
-    # persistence config
+  vmagent:
+    replicas: 3
+  vminsert:
+    replicas: 3
+  vmselect:
+    replicas: 3
+  vmstorage:
+    replicas: 3
+    temporary:
+      enabled: true
+      size: 5Gi
+      storageClass: ""
     persistence:
       enabled: true
-      accessMode: ReadWriteOnce
       size: 10Gi
       storageClass: ""
+    node-exporter:
+      enabled: true
+    kube-state-metrics:
+      enabled: true
 
 registry:
   replicas: 3
@@ -109,6 +122,7 @@ registry-proxy:
   imageRegistry: registry.drycc.cc
 
 gateway:
+  gatewayClass: {{global.gatewayClass}}
   acme:
     server: {{acme.server}}
     externalAccountBinding:
@@ -149,4 +163,3 @@ global:
   clusterDomain: {{global.clusterDomain}}
   platformDomain: {{global.workflowDomain}}
   certManagerEnabled: {{global.certManagerEnabled}}
-  gatewayClass: {{global.gatewayClass}}
