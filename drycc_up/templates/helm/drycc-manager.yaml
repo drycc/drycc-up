@@ -54,7 +54,7 @@ passport:
     secret: {{grafana.passportSecret}}
     grant_type: "authorization-code"
     prefix: "drycc-grafana"
-    redirect_uri: "/login/generic_oauth"
+    redirect_uri: "/oauth2/callback"
 
 gateway:
   gatewayClass: {{gateway.gatewayClass}}
