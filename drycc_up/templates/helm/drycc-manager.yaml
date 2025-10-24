@@ -9,6 +9,7 @@ environment:
 initClusters:
 - name: local
   url: "http://drycc.{{global.workflowDomain}}"
+  metrics: "http://drycc-grafana.{{global.workflowDomain}}
   key: {{controller.workflowManagerAccessKey}}
   secret: {{controller.workflowManagerSecretKey}}
 
@@ -41,6 +42,7 @@ passport:
   - name: "manager"
     key: ""
     secret: ""
+    grant_type: "authorization-code"
     prefix: "drycc-manager"
     redirect_uri: "/v1/complete/drycc/"
   - name: "controller"
