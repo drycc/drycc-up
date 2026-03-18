@@ -43,7 +43,7 @@ def run_script(runner, command, envs=None, **kwargs):
 rm -rf /tmp/environment; cat << EOF > "/tmp/environment"
 %s
 EOF
-""" % "\n".join(["export %s=%s" % (key, value) for key, value in envs.items()])
+""" % "\n".join(["export %s='%s'" % (key, value) for key, value in envs.items()])
     runner.run(create_env_file)
     command = "; ".join([
         "source /tmp/environment",
